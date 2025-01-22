@@ -1,3 +1,9 @@
+# do not log the slurm output files
+*.out
+
+# for now lets not log .csv files that will clog up gh repo
+*.csv
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
