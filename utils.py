@@ -19,7 +19,7 @@ def read_paper(paper_name):
     # Recreate the list by splitting the string by the delimiter
     return content.split(delimiter)
 
-
+# TO be DEPRECATED
 def build_prompt(system_directions, about_user=None, prompt=None):
     messages = [{"role": "system", "content": system_directions}]
     if about_user:   
@@ -27,6 +27,42 @@ def build_prompt(system_directions, about_user=None, prompt=None):
     if prompt:
         messages.append({"role": "user", "content": f"{prompt}"})
     return messages
+
+
+def construct_prompt(system=None, user=None, assistant=None):
+    '''
+    Will better handle multi-turn prompting
+    Allows for addition of assistant prompt type
+    **  Will need to use X.extend functionality to ensure multiple calls of this
+        end up in a single list vs a list of lists if you use append
+    '''
+    messages = []
+    if system:
+        messages.append(get_prompt_module(
+            prompt_role='system',
+            prompt = system
+        ))
+    if user:
+        messages.append(get_prompt_module(
+            prompt_role='user',
+            prompt = user
+        ))
+    if assistant:
+        messages.append(get_prompt_module(
+            prompt_role='assistant',
+            prompt = assistant
+        ))
+    return messages
+
+
+def get_prompt_module(prompt_role=None, prompt=''):
+    '''
+    General function to return appropriate dictionary 
+    With user type and prompt content 
+    '''
+    if prompt_role is None:
+        prompt_role = 'user'
+    return {'role': prompt_role, 'content': prompt}
 
 
 def get_quant_config(eigth_bit, four_bit):
@@ -110,15 +146,6 @@ def get_output(pipeline, prompt, max_new_tokens=100, temp=0.6, top_p=0.9,):
     return outputs[0]["generated_text"]
 
 
-### To replace the missing tokens and stop "open ended generation??"
-## https://github.com/vllm-project/vllm/issues/4180#issuecomment-2066004748
-#terminators = [
-#    pipeline.tokenizer.eos_token_id, --> 128009
-#    pipeline.tokenizer.convert_tokens_to_ids("<|eot_id|>") --> 128009
-#]
-###
-
-
 def get_base_df():
     return pd.DataFrame({}, columns=['system_prompt', 'user_prompt', 'output'])
 
@@ -145,28 +172,6 @@ def store_output(pipeline,
     model_output = get_output(pipeline, full_prompt, max_new_tokens=max_new_tokens, temp=temp, top_p=top_p)
     row_df = get_row_df(full_prompt, model_output)
     df = pd.concat([df, row_df], ignore_index=True)
-    return df
-
-
-#full_prompt = pipeline.tokenizer.apply_chat_template(full_prompt, tokenize=False, add_generation_prompt=True)
-# the above is not needed when using a pipeline but would be necessary without pipeline
-
-
-
-def query_model(pipeline,
-                queries, 
-                system_directions, 
-                new_tokens=100,
-                temp=0.6, 
-                top_p=0.9,): #rep_penalty=5.5, length_penalty=1.
-    df = get_base_df()
-    for query in queries:
-        df = store_output(pipeline,
-                          df, 
-                          system_directions=system_directions,
-                          max_new_tokens=new_tokens,
-                          prompt=query,
-                          temp=temp, top_p=top_p,) #rep_penalty=rep_penalty, length_penalty=length_penalty)
     return df
 
 
@@ -372,7 +377,8 @@ class PromptBuilder():
             (3) Paper in question -- role: user
             '''
             if self.use_rag:
-                full_prompt = build_prompt(system_directions=self.system_directions, 
+                full_prompt = build_prompt(
+                                system_directions=self.system_directions, 
                                about_user=self.one_shot_prompt, 
                                prompt=user_prompt)
             else:
@@ -502,6 +508,7 @@ def get_time():
     date = f'{dt.month}_{dt.day}'
     return date, time
     time = f'{dt.hour}:{dt.minute}'
+
 
 def make_trial_folder(trial_name):
     os.makedirs(trial_name, exist_ok=True)
