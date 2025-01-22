@@ -1,0 +1,16 @@
+{
+    "accession": "AM933173",
+    "data_accessed": "True",
+    "pmcid": "PMC8415480",
+    "summary": "The purpose of this study is to investigate the efficacy of a new means for producing an innactive vaccine against the pathogen Salmonella enterica subsp. enterica serovar Gallinarum (SG) for safe use in chickens younger than six weeks.",
+    "tools_software": [
+        {
+            "tool": "BLAST (v2.7.1)"
+        }
+    ],
+    "use_cases": [
+        {
+            "case": "The complete genome for Salmonella enterica subsp. enterica serovar Gallinarum str. 287/91, represented by the accession AM933173, was leveraged by the authors because this dataset was returned as a result of a BLAST analysis carried out to identify species showing high similarity with the recently sequenced 07Q015 strain of the same organism. Strain 287/91 was mentioned by the authors as the best hit of all results returned."
+        }
+    ]
+}

@@ -1,0 +1,19 @@
+{
+    "accession": "NC_034156",
+    "data_accessed": "True",
+    "pmcid": "PMC7414432",
+    "summary": "In this article the authors leverage whole-genome sequencing and comparative genomics to analyze the novel Agua Salud alphavirus (ASALV), finding that the virus represents the first insect-restricted alphavirus of the New World.",
+    "tools_software": [
+        {
+            "tool": "Geneious R9.1.8"
+        },
+        {
+            "tool": "MAFFT-E v7.308"
+        }
+    ],
+    "use_cases": [
+        {
+            "case": "The data under accession number NC_034156 was used for comparison of short repeated sequence (SRS) motifs and repeated sequence elements (RSEs) found within the newly sequenced ASALV genome sequence."
+        }
+    ]
+}

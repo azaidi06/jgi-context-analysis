@@ -1,0 +1,34 @@
+{
+    "accession": "CP000046",
+    "data_accessed": "True",
+    "pmcid": "PMC5932375",
+    "summary": "The purpose of this article is to investigate the genetic relationships and diversity of USA500 methicillin-resistant Staphylococcus aureus (MRSA) isolates from the U.S. Emerging Infections Program through whole-genome sequencing and phylogenetic analysis.",
+    "tools_software": [
+        {
+            "tool": "Interactive Tree of Life (iTOL)"
+        },
+        {
+            "tool": "RAxML version 8.2.11"
+        },
+        {
+            "tool": "Parsnp"
+        },
+        {
+            "tool": "ClonalFrameML"
+        },
+        {
+            "tool": "PhyML"
+        },
+        {
+            "tool": "BEAST 2.4.5"
+        }
+    ],
+    "use_cases": [
+        {
+            "case": "The data was used as an outgroup in a phylogenetic analysis of Staphylococcus aureus USA500 strains."
+        },
+        {
+            "case": "The data was used as an outgroup in a molecular dating analysis in which the BEAST tool was used to estimate the divergence of USA500 clades."
+        }
+    ]
+}

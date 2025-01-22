@@ -1,0 +1,40 @@
+{
+    "accession": "CP031304",
+    "data_accessed": "True",
+    "pmcid": "PMC6459918",
+    "summary": "In this article the authors use a variety of genomic analysis techniques to identify a previously uncharacterized phosphorothioate-based (PT-based) Dnd antiviral defence system that is widespread in Archaea and Bacteria.",
+    "tools_software": [
+        {
+            "tool": "MEGA 5.2"
+        },
+        {
+            "tool": "MUSCLE"
+        },
+        {
+            "tool": "BLAST"
+        },
+        {
+            "tool": "EMBOSS"
+        },
+        {
+            "tool": "R"
+        }
+    ],
+    "use_cases": [
+        {
+            "case": "In this article the authors describe the sequencing (SMRT sequencing using the PacBio RSII platform), PT component analysis, and eventual deposition in GenBank and SRA of the data represented by accession number CP031304."
+        },
+        {
+            "case": "The data represented by accession number CP031304 was used by the authors to guide primer design for the PCR-based construction of plasmid pWHU3808, which the authors leveraged to examine genetic components essential for antiviral activity in Haloterrigena jeotgali A29."
+        },
+        {
+            "case": "The data under accession CP031304 was used to source DndCD protein sequences which were then used as a BLAST query to explore the occurrence and diversity of Dnd systems across archaeal genomes."
+        },
+        {
+            "case": "In order to investigate the evolutionary history of PT-modification components in Haloterrigena jeotgali A29, the authors used the data under accession CP031304 as a reference for calculating the alignment similarity rate between 261 DndCD-PbeAC pairs and their respective reference Dnd and Pbe proteins."
+        },
+        {
+            "case": "Data under the accession number CP031304, representing part of the Haloterrigena jeotgali A29 genome, provided DndC, DndD, PbeA and PbeC protein sequences which were concatenated to build a phylogentic tree for invesitgating the global presence of the PT-based PbeABCD antiviral defence system."
+        }
+    ]
+}

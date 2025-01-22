@@ -1,0 +1,82 @@
+{
+    "accession": "PPFD00000000",
+    "data_accessed": "True",
+    "pmcid": "PMC6955870",
+    "summary": "This article reports the sequencing of a draft genome for Endozoicomonas sp. OPT23 isolated from the intertidal marine sponge O. papilla, along with a description of the genome's features and a comprehensive comparative analysis with genomes of other Endozoicomonas species from various habitats.",
+    "tools_software": [
+        {
+            "tool": "cutadapt v1.12"
+        },
+        {
+            "tool": "Velvet v1.2.10"
+        },
+        {
+            "tool": "SSPACE_Standard v3.0"
+        },
+        {
+            "tool": "GapFillerv1.10"
+        },
+        {
+            "tool": "PROKKA v1.12"
+        },
+        {
+            "tool": "CheckM v1.0.08"
+        },
+        {
+            "tool": "CGview"
+        },
+        {
+            "tool": "eggnog-mapper tool v1.0.3"
+        },
+        {
+            "tool": "eggnog-mapper_COGextraction"
+        },
+        {
+            "tool": "gplots v3.0.1"
+        },
+        {
+            "tool": "R v3.4.4"
+        },
+        {
+            "tool": "OrthoFinder v2.3.1"
+        },
+        {
+            "tool": "MUSCLE v3.8.31"
+        },
+        {
+            "tool": "trimAl v1.4"
+        },
+        {
+            "tool": "FASconCAT v1.1"
+        },
+        {
+            "tool": "TREE v1.6.1"
+        },
+        {
+            "tool": "Pyani"
+        },
+        {
+            "tool": "GGDC 2.1"
+        },
+        {
+            "tool": "BLAST"
+        },
+        {
+            "tool": "GET_HOMOLOGUES v3.0"
+        },
+        {
+            "tool": "BlastKOALA"
+        },
+        {
+            "tool": "SecReT6"
+        },
+        {
+            "tool": "FIMO v5.05"
+        }
+    ],
+    "use_cases": [
+        {
+            "case": "The data represents the output of the study, as the authors performed whole-genome sequencing, assembly, and annotation of the strain, compared its features with those of other Endozoicomonas species, and deposited the resulting data in the GenBank database under this accession number."
+        }
+    ]
+}

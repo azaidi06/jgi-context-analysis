@@ -1,0 +1,16 @@
+{
+    "accession": "CP031314",
+    "data_accessed": "True",
+    "pmcid": "PMC6459918",
+    "summary": "In this article the authors use a variety of genomic analysis techniques to identify a previously uncharacterized phosphorothioate-based (PT-based) Dnd antiviral defence system that is widespread in Archaea and Bacteria.",
+    "tools_software": [
+        {
+            "tool": "R"
+        }
+    ],
+    "use_cases": [
+        {
+            "case": "In this article the authors describe the sequencing (SMRT sequencing using the PacBio RSII platform), PT component analysis, and eventual deposition in GenBank and SRA of the data represented by accession number CP031314."
+        }
+    ]
+}

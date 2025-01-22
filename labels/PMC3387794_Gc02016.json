@@ -1,0 +1,55 @@
+{
+    "accession": "Gc02016",
+    "data_accessed": "True",
+    "pmcid": "PMC3387794",
+    "summary": "The purpose of this article is to report the sequencing of the complete genome sequence of bacterium Thermovirga lienii Cas60314 and to describe the organism's phenotypic and genomic features.",
+    "tools_software": [
+        {
+            "tool": "Newbler version 2.0.00.20-PostRelease-11-05-2008"
+        },
+        {
+            "tool": "Velvet version 1.0.13"
+        },
+        {
+            "tool": "Prodigal"
+        },
+        {
+            "tool": "phrap version SPS - 4.24"
+        },
+        {
+            "tool": "gapResolution"
+        },
+        {
+            "tool": "Dupfinisher "
+        },
+        {
+            "tool": "Consed"
+        },
+        {
+            "tool": "Polisher "
+        },
+        {
+            "tool": "GenePRIMP"
+        },
+        {
+            "tool": "tRNAscan-SE"
+        },
+        {
+            "tool": "RNAMMer"
+        },
+        {
+            "tool": "Rfam"
+        },
+        {
+            "tool": "TMHMM"
+        },
+        {
+            "tool": "signalP"
+        }
+    ],
+    "use_cases": [
+        {
+            "case": "The dataset represented by the Genomes OnLine Database accession Gc02016 is the main focus of this study, in which the authors describe the sequencing and annotation of the genome, its genomic features, and its deposition in various databases."
+        }
+    ]
+}

@@ -1,0 +1,12 @@
+{
+    "accession": "CP000029",
+    "data_accessed": "True",
+    "pmcid": "PMC3407220",
+    "summary": "The purpose of this study is to investigate the role of the two-component signal transduction system ArlRS in regulating Staphylococcus epidermidis biofilm formation.",
+    "tools_software": [],
+    "use_cases": [
+        {
+            "case": "The data represented by the accession CP000029 was used to guide the design of primers for the PCR amplification of certain regions of the PBT2 shuttle vector plasmid. The resulting regions were used in the reconstruction a recombinant plasmid, PBT2-arlS, that was later transformed into specific Staphylococcus epidermidis strains."
+        }
+    ]
+}

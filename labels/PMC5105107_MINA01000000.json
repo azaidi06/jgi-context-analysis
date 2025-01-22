@@ -1,0 +1,25 @@
+{
+    "accession": "MINA01000000",
+    "data_accessed": "True",
+    "pmcid": "PMC5105107",
+    "summary": "The purpose of this article is to report the draft genome sequence of Mycobacterium bovis strain D-10-02315 isolated from wild boar, with the goal of improving knowledge of the genetic determinants involved in modulation of virulence, spread in multi-host systems, and persistence over time.",
+    "tools_software": [
+        {
+            "tool": "sickle version 1.33"
+        },
+        {
+            "tool": "bowtie2 version 2.2.6 "
+        },
+        {
+            "tool": "Spades version 3.9.0"
+        },
+        {
+            "tool": "National Center for Biotechnology Information (NCBI) Prokaryotic Genome Annotation Pipeline"
+        }
+    ],
+    "use_cases": [
+        {
+            "case": "The data represents the output of the study, as the authors performed whole-genome sequencing, assembly, and annotation of the strain and deposited the resulting data in the GenBank database under this accession number."
+        }
+    ]
+}

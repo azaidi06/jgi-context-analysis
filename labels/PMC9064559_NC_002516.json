@@ -1,0 +1,16 @@
+{
+    "accession": "NC_002516",
+    "data_accessed": "TRUE",
+    "pmcid": "PMC9064559",
+    "summary": "The purpose of this article is to report the finding that the bacterial strain Pseudomonas aeruginosa AR01 may be a promising candidate for medical biotechnology because its genome encodes many therapeutic enzymes.",
+    "tools_software": [
+        {
+            "tool": "NCBI (National Center for Biotechnology Information) database"
+        }
+    ],
+    "use_cases": [
+        {
+            "case": "The data under accession number NC_002516, which represents the genome Pseudomonas aeruginosa PAO1, was used to design primers for colony PCR. The PCR analysis identified sequences encoding specific cancer-adjacent therapeutic enzymes in the bacterium Pseudomonas aeruginosa AR01. The genome of P. aeruginosa PAO1 was chosen for this purpose because the authors found via a NCBI database search that this organism was both closely related to the AR01 strain and contained a high frequency of gene clusters encoding therapeutic enzymes of interest."
+        }
+    ]
+}

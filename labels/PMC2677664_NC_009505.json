@@ -1,0 +1,32 @@
+{
+    "accession": "NC_009504",
+    "data_accessed": "True",
+    "pmcid": "PMC2677664",
+    "summary": "In this article the authors use comparative genomics to investigate the genomic underpinnings of the differences in pathogenicity between the sheep pathogen Brucella ovis, which does not cause zoonotic disease, and other Brucella species that are zoonotic pathogens.",
+    "tools_software": [
+        {
+            "tool": "MUMmer"
+        },
+        {
+            "tool": "COG"
+        },
+        {
+            "tool": "BLAST"
+        },
+        {
+            "tool": "HMM"
+        }
+,
+        {
+            "tool": "GLIMMER"
+        }
+    ],
+    "use_cases": [
+        {
+            "case": "The data represented by Brucella ovis ATCC 25840 chromosome I, along with its counterpart in chromosome II, were sequenced and presented by the authors of this article in order to investigate pathogenicity in various Brucella strains."
+        },
+        {
+            "case": "The data represented by the accession number NC_009504 was used as the basis of an extensive comparative analysis with the genomes of other Brucella species, in which features such as genome size, G+C content, proteome composition, metabolism, the presence of urease were analyzed to investigate differences in pathogenicity between species."
+        }
+    ]
+}

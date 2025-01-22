@@ -1,0 +1,22 @@
+{
+    "accession": "CP026503",
+    "data_accessed": "True",
+    "pmcid": "PMC6753271",
+    "summary": "The purpose of this article is to report the draft genome sequence of Lactobacillus crispatus Strain V4 isolated from a vaginal swab from a healthy nonmenopausal 35-year-old French woman, with the goal of improving knowledge of the genetic diversity within the species and the mechanisms involved in microbiome-vaginal health interactions.",
+    "tools_software": [
+        {
+            "tool": "TOOL NAME str"
+        },
+        {
+            "tool": "TOOL NAME str"
+        },
+        {
+            "tool": "TOOL NAME str"
+        }
+    ],
+    "use_cases": [
+        {
+            "case": "The data under the accession CP026503, representing the complete genome of Lactobacillus crispatus strain AB70, was used for comparative analysis with strain V4, leading the authors to conclude that strain V4 was in fact a member of the L. crispatus species."
+        }
+    ]
+}

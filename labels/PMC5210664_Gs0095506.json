@@ -1,0 +1,12 @@
+{
+    "accession": "Gs0095506",
+    "data_accessed": "False",
+    "pmcid": "PMC5210664",
+    "summary": "The purpose of this article is to describe the updates and feature enhancements in the Genomes OnLine Database (GOLD) version 6.",
+    "tools_software": [],
+    "use_cases": [
+        {
+            "case": "The data represented by this accession is not used directly in this article. Rather, the accession is mentioned as an example of the newly introduced Combined Assembly analysis project (AP) entity type in the GOLD Database."
+        }
+    ]
+}

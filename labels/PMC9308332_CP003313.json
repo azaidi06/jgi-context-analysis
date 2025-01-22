@@ -1,0 +1,31 @@
+{
+    "accession": "CP003313",
+    "data_accessed": "True",
+    "pmcid": "PMC9308332",
+    "summary": "In this study the authors isolated the s4 (serogroup F) strain of the pathogenic bacterium Pasteurella multocida strain from the lungs of infected rabits and subjected it to whole-genome sequencing and comparative analysis for the purposes of understanding the pathogenic variability amongst P. multocida strains.",
+    "tools_software": [
+        {
+            "tool": "MEGA 5.0"
+        },
+        {
+            "tool": "Mauve (version 2.4.0)"
+        },
+        {
+            "tool": "BLAST (version 2.4.0)"
+        },
+        {
+            "tool": "BRIG (version 0.95-dist)"
+        },
+        {
+            "tool": "BLAST (version 2.4.0)"
+        }
+    ],
+    "use_cases": [
+        {
+            "case": "The complete genome of P. multocida HN06 was used by the authors to source the sequences of seven MLST virulence genes for use in producing a neighbour-joining tree including several P. multocida, B. bronchiseptica, and S. aureus strains. This analysis allowed the authors to determine the presence of a common ancestor between P. multocida isolates from their sample and to select the s4 strain for sequencing."
+        },
+        {
+            "case": "The complete genome of strain HN06 was used along with several other P. multocida genomes for a comparative analysis with the genome sequence of strain s4, which was sequenced by the authors as part of this work. In particular, the authors determined that the cap locus of HN06, a capsular serogroup D strain, was distinct from that of S4, a serogroup F strain."
+        }
+    ]
+}

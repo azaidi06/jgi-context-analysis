@@ -1,0 +1,16 @@
+{
+    "accession": "BX470250",
+    "data_accessed": "True",
+    "pmcid": "PMC9308332",
+    "summary": "In this study the authors isolated the s4 (serogroup F) strain of the pathogenic bacterium Pasteurella multocida strain from the lungs of infected rabits and subjected it to whole-genome sequencing and comparative analysis for the purposes of understanding the pathogenic variability amongst P. multocida strains.",
+    "tools_software": [
+        {
+            "tool": "MEGA 5.0"
+        }
+    ],
+    "use_cases": [
+        {
+            "case": "The complete genome of B. bronchiseptica RB50 was used by the authors to source the sequences of seven MLST virulence genes for use in producing a neighbour-joining tree including several P. multocida, B. bronchiseptica, and S. aureus strains. This analysis allowed the authors to determine the presence of a common ancestor between P. multocida isolates from their sample and to select the s4 strain for sequencing."
+        }
+    ]
+}

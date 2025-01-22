@@ -1,0 +1,19 @@
+{
+    "accession": "CP007500",
+    "data_accessed": "True",
+    "pmcid": "PMC5932375",
+    "summary": "The purpose of this article is to investigate the genetic relationships and diversity of USA500 methicillin-resistant Staphylococcus aureus (MRSA) isolates from the U.S. Emerging Infections Program through whole-genome sequencing and phylogenetic analysis.",
+    "tools_software": [
+        {
+            "tool": "ISMapper v1.2"
+        },
+        {
+            "tool": "BLAST+ v2.2.28"
+        }
+    ],
+    "use_cases": [
+        {
+            "case": "The DNA sequence for Staphylococcus aureus 2395 plasmid, called pUSA500, was used by the authors to investigate the presence and origin of the toxicity-adjacent IS256 insertion site in other isolates from the C1 clade."
+        }
+    ]
+}

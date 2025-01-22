@@ -1,0 +1,16 @@
+{
+    "accession": "KP100338",
+    "data_accessed": "True",
+    "pmcid": "PMC5489566",
+    "summary": "In this article, the authors used comparative genomics on 35 Photobacterium strains representing 16 of the 28 species described so far to understand the genomic diversity present in the Photobacterium genus.",
+    "tools_software": [
+        {
+            "tool": "CLC Main Workbench"
+        }
+    ],
+    "use_cases": [
+        {
+            "case": "The dataset represented by the accession KP100338 was one of several plasmid sequences used to search 35 Photobacterium genomes of interest to the authors for features related to virulence, drug resistance, and biosynthesis."
+        }
+    ]
+}
