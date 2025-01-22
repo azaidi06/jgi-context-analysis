@@ -209,25 +209,6 @@ class jgi_dataset:
         return paper_dict
 
 
-# def inject_metaprompt(target_key, ds, example_out=None, paper_len=None,
-#                      include_metadata=False):
-#     paper_name = ds.key_paper_dict[target_key]
-#     paper = ds.paper_dict[paper_name]
-#     meta = ds.get_metadata(target_key)
-#     if paper_len is None:
-#         paper_len = len(paper)
-#     prompt = f'Can you help me understand the role the genbank identifier {target_key} has in the following paper?\
-# \nPlease note whether the dataset is used in the paper or just mentioned -- if it is used, please clarify how it was used \n'
-    
-#     if include_metadata:
-#         prompt += 'here is some associated metadata:\n{meta}\n'
-#     prompt += f'and here is the paper {paper[:paper_len]}'
-#     if type(example_out) is not dict:
-#         example_out = get_json(f'labels/{paper_name}_{target_key}.json')
-#     prompt = prompt + '\nPlease ensure your output is in this json format:\n' + str(example_out)
-#     return prompt
-
-
 def inject_metaprompt(target_key, 
                       ds, 
                       example_out=None, 
@@ -529,26 +510,13 @@ def make_trial_folder(trial_name):
 def load_json(file_path):
     with open(file_path, 'r') as f:
         return json.load(f)
+   
 
-
-# def get_metadata(identifier=None):
-#     if identifier is None:
-#         identifier = 'CP000046'
-#     url = f'https://dce.jgi.doe.gov/api/prompt?id={identifier}'
-#     res = requests.get(url)
-#     return res.text
-
-
-# def get_papers():
-#     paper_names = [fname.split('.')[0] for fname in os.listdir('papers/') if fname.endswith('.txt')]
-#     papers = [read_paper(paper_name) for paper_name in paper_names]
-#     paper_dict = dict(zip(paper_names, papers))
-#     return paper_dict
-
-
-# def get_paper_name(target_key, df):
-#     return df[df.target_keys == target_key].pmcid.unique().item()     
-
+def get_test_target_keys():
+        prelim_idens = [x.split('.')[:1][0].split('_')[1:] for x in os.listdir('labels')]
+        identifiers = [x[0] if len(x) == 1 else '_'.join(x) for x in prelim_idens]
+        identifiers = [ids for ids in identifiers if len(ids) > 2]
+        return identifiers
 
 
 def debug_stuff(fast=True): 

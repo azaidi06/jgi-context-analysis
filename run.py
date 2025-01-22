@@ -10,22 +10,27 @@ import json
 
 
 if __name__ == "__main__":
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument("--config", help=load_json, )
+    debug_mode = False
 
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--config", help=load_json, )#default='l8')
-    #parser.add_argument("-v", "--verbose", action="store_true")
-    # args = parser.parse_args()
-    # config_dict = vars(args).get('config', {})
-    # print(config_dict['model'])
     print('starting')
+    
+    '''
+    Lets get the dataset
+    '''
     ds = jgi_dataset()
-    print('got dataset\n')
-    #print(ds)
+    if debug_mode: print('got dataset\n')
+    
+    '''
+    Now lets get our model
+        To-do: make this a field that can be set in the json -- default to llama 8
+    '''
     model_type = 'l8' #l8 --> llama8B; l70 --> 70B; l405 --> 405B
-    #pipeline = get_pipeline(model_type, eigth_bit=False, four_bit=False,)
+    pipeline = get_pipeline(model_type, eigth_bit=False, four_bit=False,)
     print(f'got pipeline: we are using {model_type}\n')
-    _, _, _ = debug_stuff()
+    
+    
 #     system_dirs = "Your output should only feature valid json\n\
 # No text should be outside of the json format\n\
 # The user would like to know more information about specific items of genomic data\n\
@@ -43,10 +48,10 @@ if __name__ == "__main__":
     # paper_foll... defaults to--> '\nPlease ensure your output is in this json format:\n'
     paper_followup_prompt = "Please ensure that the tools are output in a list format"
     
-    prelim_idens = [x.split('.')[:1][0].split('_')[1:] for x in os.listdir('labels')]
-    identifiers = [x[0] if len(x) == 1 else '_'.join(x) for x in prelim_idens]
-    identifiers = [ids for ids in identifiers if len(ids) > 2]
-    print(f'These are the identifiers we are looking at: {identifiers}')
+    
+    identifiers = get_test_target_keys()
+    if debug_mode: 
+        print(f'These are the identifiers we are looking at: {identifiers}')
     
     
     # out_df = run_model(pipeline, ds,
