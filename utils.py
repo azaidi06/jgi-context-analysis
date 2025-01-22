@@ -19,15 +19,6 @@ def read_paper(paper_name):
     # Recreate the list by splitting the string by the delimiter
     return content.split(delimiter)
 
-# TO be DEPRECATED
-def build_prompt(system_directions, about_user=None, prompt=None):
-    messages = [{"role": "system", "content": system_directions}]
-    if about_user:   
-        messages.append({"role": "user", "content": f"{about_user}"})
-    if prompt:
-        messages.append({"role": "user", "content": f"{prompt}"})
-    return messages
-
 
 def construct_prompt(system=None, user=None, assistant=None):
     '''
@@ -168,7 +159,7 @@ def store_output(pipeline,
                  top_p=0.9,): #rep_penalty=5.5, length_penalty=1.0):
     if prompt is None:
         prompt = "What can you tell me about CP000046.1?" 
-    full_prompt = build_prompt(system_directions, about_user, prompt)
+    full_prompt = construct_prompt(system=system_directions, user=prompt)
     model_output = get_output(pipeline, full_prompt, max_new_tokens=max_new_tokens, temp=temp, top_p=top_p)
     row_df = get_row_df(full_prompt, model_output)
     df = pd.concat([df, row_df], ignore_index=True)
@@ -367,23 +358,8 @@ class PromptBuilder():
                      (d) system direction -- emphasize/remind model
                 '''
                 user_prompt = user_prompt + self.system_directions
-            full_prompt = build_prompt(system_directions=self.system_directions, 
-                                       about_user=None, 
-                                       prompt=user_prompt)
-        else: # this will put the rag example into the user prompt
-            '''In this case the prompt will look like this:
-            (1) system_directions -- role: system
-            (2) Rag example -- role: user
-            (3) Paper in question -- role: user
-            '''
-            if self.use_rag:
-                full_prompt = build_prompt(
-                                system_directions=self.system_directions, 
-                               about_user=self.one_shot_prompt, 
-                               prompt=user_prompt)
-            else:
-                full_prompt = build_prompt(system_directions=self.system_directions, 
-                               prompt=user_prompt)
+                full_prompt = construct_prompt(system=self.system_directions,
+                                           user=user_prompt)
         return full_prompt, target_key, self.ds.get_paper_name(target_key), base_prompt
     
     
@@ -506,8 +482,8 @@ def run_model(pipeline, ds,
 def get_time():
     dt = datetime.datetime.now()
     date = f'{dt.month}_{dt.day}'
-    return date, time
     time = f'{dt.hour}:{dt.minute}'
+    return date, time
 
 
 def make_trial_folder(trial_name):
@@ -520,7 +496,7 @@ def load_json(file_path):
    
 
 def get_test_target_keys():
-        prelim_idens = [x.split('.')[:1][0].split('_')[1:] for x in os.listdir('labels')]
+        prelim_idens = [x.split('.')[:1][0].split('_')[1:] for x in os.listdir('labels') if x[:3] == 'PMC']
         identifiers = [x[0] if len(x) == 1 else '_'.join(x) for x in prelim_idens]
         identifiers = [ids for ids in identifiers if len(ids) > 2]
         return identifiers
@@ -532,10 +508,8 @@ def debug_stuff(fast=True):
     pipeline = get_pipeline(model_type, eigth_bit=False, four_bit=fast,)
     system_dirs = "The user would like to know more information about specific items of genomic data\n\
         Please only include information that you were provided in the prompt"
-    
-    prelim_idens = [x.split('.')[:1][0].split('_')[1:] for x in os.listdir('labels')]
-    identifiers = [x[0] if len(x) == 1 else '_'.join(x) for x in prelim_idens]
-    identifiers = [ids for ids in identifiers if len(ids) > 2]
+
+    identifiers = get_test_target_keys()
 
     pb = PromptBuilder(ds, system_direction=system_dirs,
                     include_example_output=False,

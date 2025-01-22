@@ -12,7 +12,7 @@ import json
 if __name__ == "__main__":
     # parser = argparse.ArgumentParser()
     # parser.add_argument("--config", help=load_json, )
-    debug_mode = False
+    debug_mode = True
 
     print('starting')
     
@@ -48,26 +48,26 @@ if __name__ == "__main__":
     # paper_foll... defaults to--> '\nPlease ensure your output is in this json format:\n'
     paper_followup_prompt = "Please ensure that the tools are output in a list format"
     
-    
+
     identifiers = get_test_target_keys()
     if debug_mode: 
         print(f'These are the identifiers we are looking at: {identifiers}')
     
     
-    # out_df = run_model(pipeline, ds,
-    #                    model_type=model_type,
-    #                    system_dir=system_dirs,
-    #                    num_samples=len(identifiers), 
-    #                    target_keys=identifiers,
-    #                    append_prompts=True, 
-    #                    print_prog=False, 
-    #                    one_shot_ids=None, 
-    #                    save=True,
-    #                    trial_name='tools',
-    #                    csv_name=None,
-    #                    debug_prompt=False,
-    #                    base_prompt_top=base_prompt_top,
-    #                    paper_followup_prompt=paper_followup_prompt,
-    #                    include_example_output=False,)
+    out_df = run_model(pipeline, ds,
+                       model_type=model_type,
+                       system_dir=system_dirs,
+                       num_samples=2,  #len(identifiers), 
+                       target_keys=identifiers,
+                       append_prompts=True, 
+                       print_prog=False, 
+                       one_shot_ids=None, 
+                       save=True,
+                       trial_name='testing',
+                       csv_name=None,
+                       debug_prompt=False,
+                       base_prompt_top=base_prompt_top,
+                       paper_followup_prompt=paper_followup_prompt,
+                       include_example_output=False,)
     
-    # print(out_df.shape)
+    print(out_df.shape)
