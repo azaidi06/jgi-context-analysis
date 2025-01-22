@@ -179,7 +179,7 @@ def get_json(path):
 
 class jgi_dataset:
     def __init__(self):
-        self.df = pd.read_csv('hand_lbl.csv')
+        self.df = pd.read_csv('labels/hand_lbl.csv')
         self.target_keys = self.df.target_keys.unique()
         self.key_paper_dict = {tk: self.get_paper_name(tk, setup=True) for tk in self.target_keys}
         self.paper_dict = self.get_papers()
@@ -282,7 +282,7 @@ class PromptBuilder():
         self.ds = ds
         self.target_keys = ds.target_keys
         self.one_shot_example = one_shot_example
-        self.response_template = get_json('response_template.json')
+        self.response_template = get_json('labels/response_template.json')
         self.include_metadata = include_metadata
         self.add_system_rag = system_rag
         self.use_rag = user_rag
