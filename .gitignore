@@ -1,6 +1,10 @@
 # do not log the slurm output files
 *.out
 
+# for now lets not push the labels and papers being used
+papers/
+labels/
+
 # for now lets not log .csv files that will clog up gh repo
 *.csv
 

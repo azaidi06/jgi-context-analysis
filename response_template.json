@@ -1,0 +1,28 @@
+{
+    "accession": "ACCESSION str",
+    "data_accessed": "True OR False bool",
+    "pmcid": "PMCID str",
+    "summary": "SUMMARY VALUE str",
+    "tools_software": [
+        {
+            "tool": "TOOL NAME str"
+        },
+        {
+            "tool": "TOOL NAME str"
+        },
+        {
+            "tool": "TOOL NAME str"
+        }
+    ],
+    "use_cases": [
+        {
+            "case": "USE CASE DESC str"
+        },
+        {
+            "case": "USE CASE DESC str"
+        },
+        {
+            "case": "USE CASE DESC str"
+        }
+    ]
+}
