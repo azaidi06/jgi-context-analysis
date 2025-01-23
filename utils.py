@@ -303,9 +303,6 @@ class PromptBuilder():
             know the answer"
         else:
             self.system_directions = system_direction
-        # if self.add_system_rag:
-        #     self.system_directions = self.build_one_shot_prompt(self.one_shot_key,
-        #                                                    self.one_shot_example,)
                                                            
        
     def build_one_shot_prompt(target_key, example_output, paper_len=None):
