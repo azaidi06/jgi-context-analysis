@@ -27,7 +27,7 @@ if __name__ == "__main__":
         To-do: make this a field that can be set in the json -- default to llama 8
     '''
     model_type = 'l8' #l8 --> llama8B; l70 --> 70B; l405 --> 405B
-    pipeline = get_pipeline(model_type, eigth_bit=False, four_bit=False,)
+    pipeline = get_pipeline(model_type, eigth_bit=False, four_bit=True,)
     print(f'got pipeline: we are using {model_type}\n')
     
     
@@ -46,7 +46,7 @@ if __name__ == "__main__":
     base_prompt_top = '\nPlease note what tools were used with respect to the dataset in the paper \n'
     
     # paper_foll... defaults to--> '\nPlease ensure your output is in this json format:\n'
-    paper_followup_prompt = "Please ensure that the tools are output in a list format"
+    paper_followup_prompt = "ç"
     
 
     identifiers = get_test_target_keys()

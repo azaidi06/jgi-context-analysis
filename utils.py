@@ -20,7 +20,7 @@ def read_paper(paper_name):
     return content.split(delimiter)
 
 
-def construct_prompt(system=None, user=None, assistant=None):
+def construct_prompt(system=None, user=None, assistant=None, previous_chat=None):
     '''
     Will better handle multi-turn prompting
     Allows for addition of assistant prompt type
@@ -28,20 +28,25 @@ def construct_prompt(system=None, user=None, assistant=None):
         end up in a single list vs a list of lists if you use append
     '''
     messages = []
+    if previous_chat:
+        messages.append(previous_chat)
     if system:
-        messages.append(get_prompt_module(
-            prompt_role='system',
-            prompt = system
+        messages.append(
+            get_prompt_module(
+                prompt_role='system',
+                prompt = system
         ))
     if user:
-        messages.append(get_prompt_module(
-            prompt_role='user',
-            prompt = user
+        messages.append(
+            get_prompt_module(
+                prompt_role='user',
+                prompt = user
         ))
     if assistant:
-        messages.append(get_prompt_module(
-            prompt_role='assistant',
-            prompt = assistant
+        messages.append(
+            get_prompt_module(
+                prompt_role='assistant',
+                prompt = assistant
         ))
     return messages
 
@@ -205,6 +210,7 @@ class jgi_dataset:
         return paper_dict
 
 
+### REMOVE
 def inject_metaprompt(target_key, 
                       ds, 
                       example_out=None, 
@@ -216,7 +222,8 @@ def inject_metaprompt(target_key,
                       debug_prompt=False):
     paper_name = ds.key_paper_dict[target_key]
     paper = ds.paper_dict[paper_name]
-    meta = ds.get_metadata(target_key)
+    if include_metadata:
+        meta = ds.get_metadata(target_key)
     if paper_len is None:
         paper_len = len(paper)
 
@@ -253,6 +260,7 @@ def inject_metaprompt(target_key,
 
     return prompt, base_prompt
 
+
 def prompt_debugger(base_prompt, paper_followup_prompt, example_out):
         print(f'Here is our base prompt: {base_prompt}')
         print('/n------/n')
@@ -260,6 +268,106 @@ def prompt_debugger(base_prompt, paper_followup_prompt, example_out):
         print('/n------/n')
         print(f'here is our example output {example_out}')
         print('/n------/n')
+
+
+'''
+Prompt looks like this:
+    [0] Pre Paper
+        A) Base/Body --> i.e. what tools were used with respect to the dataset in the {PMCID} paper \n'
+        ## B) Head --> i.e. Please note what tools were used with respect to the dataset in the paper \n' 
+    [1] Paper pkg
+        A) Base/Body --> Some prelim info about the paper?? could be useful to include a generated summary
+        B) Paper --> in its own field to avoid polluting the stuff we log
+        ## C) Head --> Follow up information about paper?? Could be useful to include generated tool list
+    [2] Post Paper
+        A) Base/Body --> clarification/reminder of whats needed (helpful with LONG papers/context windows)
+        ## B) Head ?
+
+    [0] --> [1 A/B] --> [2]
+''' 
+class Prompt():
+    def __init__(self,
+                dataset,
+                target_key, 
+                #example_output=None, 
+                # paper_len=None, ## not using this at the moment
+                include_metadata=False,
+                debug_prompt=False,
+                prompt_base='', # [0-A] 
+                pre_paper_prompt='', # [1-A] i.e. here's the paper in question:
+                post_paper_prompt='', # [2-A]
+                include_example_output=True,
+                example_output_path=None
+                ):
+        self.dataset = dataset
+        self.target_key = target_key
+        self.example_output_path = example_output_path
+        self.include_example_output = include_example_output
+        #self.paper_len = paper_len
+        self.include_metadata = include_metadata
+        
+        self.prompt_base = prompt_base                # [0-A] 
+        self.pre_paper_prompt = pre_paper_prompt      # [1-A]
+        self.post_paper_prompt = post_paper_prompt    # [2-A]
+        
+        self.debug_prompt = debug_prompt
+
+        #lets set some variables
+        self.paper_name = self.get_pmcid(self.target_key) #PMCID
+        self.paper = self.get_paper(self.paper_name) # Stored separately bc we don't want to log this
+        #self.full_prompt = self.build_prompt()#self.prompt_base, self.pre_paper_prompt, self.paper, self.post_paper_prompt)
+
+        if include_metadata:
+            self.metadata = ds.get_metadata(target_key)
+
+    def get_pmcid(self, target_key):
+        return self.dataset.key_paper_dict[target_key]
+    
+    def get_paper(self, paper_name, str_conversion=True):
+        paper = self.dataset.paper_dict[paper_name]
+        if str_conversion:
+            paper = ' '.join(paper)
+        else:
+            paper = str(paper)
+        return paper
+    
+    def get_example_output(self,
+                           include_example_output,
+                           example_output_path=None):
+        example_output = '' #default to empty string that we can return
+        if example_output_path is None:
+            example_output_path = 'labels/response_template.json'
+        if include_example_output:
+            example_output = get_json(f'labels/{self.paper_name}_{self.target_key}.json')
+        return example_output
+        
+    '''
+    ADD RAG OPTIONS
+    Just need to pull example json
+        # adding the response template here -- a json with some constraint
+    if type(example_out) is not dict:
+        example_out = get_json(f'labels/{paper_name}_{target_key}.json')
+    if include_example_output:
+        prompt = prompt + str(example_out)
+    else:
+        example_out = '
+    '''
+    def build_prompt(self,):
+                    #include_example_output,
+                    #example_output_path):
+                    #  self.prompt_base,
+                    #  pre_paper_prompt,
+                    #  paper,    
+                    #  post_paper_prompt):
+        example_output = self.get_example_output(
+                                            self.include_example_output, 
+                                            self.example_output_path
+                                            )
+        prompt = self.prompt_base + self.pre_paper_prompt + self.paper + self.post_paper_prompt
+        prompt = prompt + str(example_output)
+        return prompt, self.prompt_base
+    ## Should there be some check done to ensure new lines are added between prompt modules?
+
 
 
 class PromptBuilder():
@@ -273,7 +381,8 @@ class PromptBuilder():
                  double_directions = False,
                  base_prompt_top=None,
                  paper_followup_prompt=None,
-                 include_example_output=True
+                 include_example_output=True,
+                 config_json=None,
                 ):
         self.ds = ds
         self.target_keys = ds.target_keys
@@ -286,6 +395,7 @@ class PromptBuilder():
         self.base_prompt_top = base_prompt_top
         self.paper_followup_prompt = paper_followup_prompt
         self.include_example_output = include_example_output
+        self.config = config_json
 
         if self.use_rag | self.add_system_rag:    
             self.one_shot_prompt = inject_metaprompt(self.one_shot_example, 
@@ -329,10 +439,12 @@ class PromptBuilder():
                           paper_len=None,
                           debug=False,):
                         #   base_prompt_top=self.base_prompt_top):
-        user_prompt, base_prompt = self.get_user_prompt(target_key, 
-                                                        paper_len=None,
-                                                        debug=debug,
-                                                        )
+        # user_prompt, base_prompt = self.get_user_prompt(target_key, 
+        #                                                 paper_len=None,
+        #                                                 debug=debug,
+        #                                                 )
+        p = Prompt(self.ds, target_key)
+        user_prompt, base_prompt = p.build_prompt()
         if append_prompts:
             if self.use_rag:
                 '''
@@ -360,15 +472,25 @@ class PromptBuilder():
         return full_prompt, target_key, self.ds.get_paper_name(target_key), base_prompt
     
     
-    
+'''
+Too hardcoded -- can the prompt info all be in one column?
+'''
 def get_log_df():
-    return pd.DataFrame(columns=['target_key', 'pmcid', 
-                                 'one_shot_key', 'one_shot_pmcid',
+    return pd.DataFrame(columns=['target_key', 
+                                 'pmcid', 
+                                 'one_shot_key', 
+                                 'one_shot_pmcid',
                                  'system_directions', 
-                                 'init_user_prompt', 'user_prompt',
-                                 'output', 'temp', 'top_p', 'max_new_tokens'])
+                                 'init_user_prompt',
+                                 'user_prompt',
+                                 'output', 
+                                 'temp', 
+                                 'top_p', 
+                                 'max_new_tokens'])
 
-
+'''
+This needs alot of work
+'''
 def log_output(pipeline, 
                prompt, 
                target_key, 
@@ -379,10 +501,16 @@ def log_output(pipeline,
                temp=0.6, 
                top_p=0.9, 
                append_prompts=False,
-               base_prompt=None):
+               base_prompt=None,
+               config_json=None):
     df = get_log_df()
     output = get_output(pipeline, prompt, max_new_tokens=max_new_tokens,
                         temp=temp, top_p=top_p)
+    
+    '''
+    NOT COOL
+    ** Want to log the json ** 
+    '''
     if append_prompts:
          df.loc[0] = [target_key, pmcid,
                       one_shot_key, one_shot_pmcid,
@@ -393,6 +521,8 @@ def log_output(pipeline,
                      prompt[0]['content'], prompt[1]['content'], prompt[2]['content'],
                      output, temp, top_p, max_new_tokens]
     return df
+
+
 
 
 def run_model(pipeline, ds,

@@ -1,5 +1,6 @@
 # do not log the slurm output files
 *.out
+results/
 
 # for now lets not push the labels and papers being used
 #papers/
