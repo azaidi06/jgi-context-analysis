@@ -270,95 +270,99 @@ def prompt_debugger(base_prompt, paper_followup_prompt, example_out):
         print('/n------/n')
 
 
-'''
-Prompt looks like this:
-    [0] Pre Paper
-        A) Base/Body --> i.e. what tools were used with respect to the dataset in the {PMCID} paper \n'
-        ## B) Head --> i.e. Please note what tools were used with respect to the dataset in the paper \n' 
-    [1] Paper pkg
-        A) Base/Body --> Some prelim info about the paper?? could be useful to include a generated summary
-        B) Paper --> in its own field to avoid polluting the stuff we log
-        ## C) Head --> Follow up information about paper?? Could be useful to include generated tool list
-    [2] Post Paper
-        A) Base/Body --> clarification/reminder of whats needed (helpful with LONG papers/context windows)
-        ## B) Head ?
+class PromptModule():
+    '''
+    Generic prompt component
+    [A] - [B] - [C] positons
+    User prompt, paper, model output, metadata
+        or anything else can be added
+    '''
+    def __init__(self,
+                 front_position=None,
+                 middle_position=None,
+                 end_position=None,
+                ):
+        self.front_position = front_position
+        self.middle_position = middle_position
+        self.end_position = end_position
+        self.full_prompt = construct_prompt(
+            self.front_position,
+            self.middle_position,
+            self.end_position,
+        )
+    def construct_prompt(self,
+                         front_position,
+                         middle_position,
+                         end_position):
+        return front_position + middle_position + end_position
 
-    [0] --> [1 A/B] --> [2]
-''' 
-class Prompt():
+'''
+Prompt looks like this: [Based on prompt module code above!]
+    [0] Pre Module
+        A) Front 
+        B) Middle
+        C) End --> Normally not used
+    [1] Paper Module
+        A) Front --> Preamble to paper or maybe a summary
+        B) Middle --> Paper normally always goes here
+        C) End  --> Follow up to paper or maybe a summary 
+    [2] Post Paper Module
+        A) Front --> Reminder of task/constraints
+        B) Middle --> Example output
+        C) End --> Normally NOT used
+
+'''
+
+class GenericPrompt():
     def __init__(self,
                 dataset,
                 target_key, 
-                #example_output=None, 
-                # paper_len=None, ## not using this at the moment
                 include_metadata=False,
-                debug_prompt=False,
-                prompt_base='', # [0-A] 
-                pre_paper_prompt='', # [1-A] i.e. here's the paper in question:
-                post_paper_prompt='', # [2-A]
-                include_example_output=True,
-                example_output_path=None
+                prompt_front='', # [A] 
+                prompt_middle='', # [B] i.e. here's the paper in question:
+                prompt_end='', # [C]
+                include_rag_example=False, # pulls relevant rag based on target key
+                include_example_output=False, # Defaults to template json
                 ):
         self.dataset = dataset
         self.target_key = target_key
+
         self.example_output_path = example_output_path
         self.include_example_output = include_example_output
-        #self.paper_len = paper_len
+        self.example_output = self.get_example_output_file()
+        
         self.include_metadata = include_metadata
+        if self.include_metadata:
+            self.metadata = ds.get_metadata(target_key)
         
-        self.prompt_base = prompt_base                # [0-A] 
-        self.pre_paper_prompt = pre_paper_prompt      # [1-A]
-        self.post_paper_prompt = post_paper_prompt    # [2-A]
+        self.prompt_front = prompt_front        # [A] 
+        self.prompt_middle = pre_middle         # [B]
+        self.prompt_end = post_end              # [C]
         
-        self.debug_prompt = debug_prompt
-
         #lets set some variables
         self.paper_name = self.get_pmcid(self.target_key) #PMCID
         self.paper = self.get_paper(self.paper_name) # Stored separately bc we don't want to log this
         #self.full_prompt = self.build_prompt()#self.prompt_base, self.pre_paper_prompt, self.paper, self.post_paper_prompt)
-
-        if include_metadata:
-            self.metadata = ds.get_metadata(target_key)
 
     def get_pmcid(self, target_key):
         return self.dataset.key_paper_dict[target_key]
     
     def get_paper(self, paper_name, str_conversion=True):
         paper = self.dataset.paper_dict[paper_name]
-        if str_conversion:
-            paper = ' '.join(paper)
-        else:
-            paper = str(paper)
+        paper = ' '.join(paper)
         return paper
     
-    def get_example_output(self,
-                           include_example_output,
-                           example_output_path=None):
-        example_output = '' #default to empty string that we can return
-        if example_output_path is None:
+    # If the prompt is RAG --> pull relevant json
+    # If not rag but want example_output --> pull the template
+    def get_example_output_file(self):
+        if self.include_rag_example:
+            example_output_path = f'labels/{self.paper_name}_{self.target_key}.json'
+        else:
             example_output_path = 'labels/response_template.json'
-        if include_example_output:
-            example_output = get_json(f'labels/{self.paper_name}_{self.target_key}.json')
+        example_output = get_json(example_output_path)
         return example_output
         
-    '''
-    ADD RAG OPTIONS
-    Just need to pull example json
-        # adding the response template here -- a json with some constraint
-    if type(example_out) is not dict:
-        example_out = get_json(f'labels/{paper_name}_{target_key}.json')
-    if include_example_output:
-        prompt = prompt + str(example_out)
-    else:
-        example_out = '
-    '''
     def build_prompt(self,):
-                    #include_example_output,
-                    #example_output_path):
-                    #  self.prompt_base,
-                    #  pre_paper_prompt,
-                    #  paper,    
-                    #  post_paper_prompt):
         example_output = self.get_example_output(
                                             self.include_example_output, 
                                             self.example_output_path
