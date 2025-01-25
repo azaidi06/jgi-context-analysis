@@ -290,11 +290,8 @@ class PromptModule():
             self.middle_position,
             self.end_position,
         )
-    def construct_prompt(self,
-                         front_position,
-                         middle_position,
-                         end_position):
-        return front_position + middle_position + end_position
+    def construct_prompt(self):
+        return self.front_position + self.middle_position + self.end_position
 
 '''
 Prompt looks like this: [Based on prompt module code above!]
@@ -318,38 +315,62 @@ class GenericPrompt():
                 dataset,
                 target_key, 
                 include_metadata=False,
-                prompt_front='', # [A] 
+                prompt_front='', # [A]  ALWAYS includes text (never paper or json)
                 prompt_middle='', # [B] i.e. here's the paper in question:
                 prompt_end='', # [C]
                 include_rag_example=False, # pulls relevant rag based on target key
-                include_example_output=False, # Defaults to template json
+                include_example_output=2, # Position 3
+                include_paper=1, # Middle prompt
+                paper_length=None
                 ):
+
         self.dataset = dataset
         self.target_key = target_key
-
-        self.example_output_path = example_output_path
-        self.include_example_output = include_example_output
-        self.example_output = self.get_example_output_file()
         
         self.include_metadata = include_metadata
         if self.include_metadata:
             self.metadata = ds.get_metadata(target_key)
         
         self.prompt_front = prompt_front        # [A] 
-        self.prompt_middle = pre_middle         # [B]
-        self.prompt_end = post_end              # [C]
+        self.prompt_middle = prompt_middle      # [B]
+        self.prompt_end = prompt_end            # [C]
         
         #lets set some variables
+        self.include_paper = include_paper
         self.paper_name = self.get_pmcid(self.target_key) #PMCID
-        self.paper = self.get_paper(self.paper_name) # Stored separately bc we don't want to log this
-        #self.full_prompt = self.build_prompt()#self.prompt_base, self.pre_paper_prompt, self.paper, self.post_paper_prompt)
+        self.paper_length = paper_length
+        self.paper = self.get_paper() # Stored separately bc we don't want to log this
+
+        self.include_rag_example = include_rag_example
+        self.include_example_output = include_example_output
+        self.example_output = self.get_example_output_file()
+
+        self.prompt = self.build_prompt()
+
+
+    def build_prompt(self):
+        # should extend to 5 in the case of yes to paper, example output and 3 different prompts input?
+        idxs = [x for x in range(3)] # list [1,2,3]
+        prompt_dict = {x: '' for x in range(3)} # creates dict {1:'', 2:'', 3:''}
+        prompt_dict[0] = self.prompt_front
+        prompt_dict[1] = self.prompt_middle
+        prompt_dict[2] = self.prompt_end
+        if self.include_paper:
+            prompt_dict[1] = prompt_dict[1] + self.paper
+        if self.include_example_output:
+            prompt_dict[2] = prompt_dict[2] + self.example_output
+        return '\n'.join(list(prompt_dict.values()))
+        
 
     def get_pmcid(self, target_key):
         return self.dataset.key_paper_dict[target_key]
     
-    def get_paper(self, paper_name, str_conversion=True):
-        paper = self.dataset.paper_dict[paper_name]
+
+    def get_paper(self):
+        paper = self.dataset.paper_dict[self.paper_name]
         paper = ' '.join(paper)
+        if self.paper_length:
+            paper = paper[self.paper_length]
         return paper
     
     # If the prompt is RAG --> pull relevant json
@@ -360,120 +381,111 @@ class GenericPrompt():
         else:
             example_output_path = 'labels/response_template.json'
         example_output = get_json(example_output_path)
+        example_output = json.dumps(example_output)
         return example_output
-        
-    def build_prompt(self,):
-        example_output = self.get_example_output(
-                                            self.include_example_output, 
-                                            self.example_output_path
-                                            )
-        prompt = self.prompt_base + self.pre_paper_prompt + self.paper + self.post_paper_prompt
-        prompt = prompt + str(example_output)
-        return prompt, self.prompt_base
-    ## Should there be some check done to ensure new lines are added between prompt modules?
 
 
 
-class PromptBuilder():
-    def __init__(self, 
-                 ds,
-                 system_direction=None,
-                 one_shot_example='MINA00000000',
-                 include_metadata=False,
-                 system_rag = False,
-                 user_rag = False,
-                 double_directions = False,
-                 base_prompt_top=None,
-                 paper_followup_prompt=None,
-                 include_example_output=True,
-                 config_json=None,
-                ):
-        self.ds = ds
-        self.target_keys = ds.target_keys
-        self.one_shot_example = one_shot_example
-        self.response_template = get_json('labels/response_template.json')
-        self.include_metadata = include_metadata
-        self.add_system_rag = system_rag
-        self.use_rag = user_rag
-        self.double_directions = double_directions
-        self.base_prompt_top = base_prompt_top
-        self.paper_followup_prompt = paper_followup_prompt
-        self.include_example_output = include_example_output
-        self.config = config_json
+# class PromptBuilder():
+#     def __init__(self, 
+#                  ds,
+#                  system_direction=None,
+#                  one_shot_example='MINA00000000',
+#                  include_metadata=False,
+#                  system_rag = False,
+#                  user_rag = False,
+#                  double_directions = False,
+#                  base_prompt_top=None,
+#                  paper_followup_prompt=None,
+#                  include_example_output=True,
+#                  config_json=None,
+#                 ):
+#         self.ds = ds
+#         self.target_keys = ds.target_keys
+#         self.one_shot_example = one_shot_example
+#         self.response_template = get_json('labels/response_template.json')
+#         self.include_metadata = include_metadata
+#         self.add_system_rag = system_rag
+#         self.use_rag = user_rag
+#         self.double_directions = double_directions
+#         self.base_prompt_top = base_prompt_top
+#         self.paper_followup_prompt = paper_followup_prompt
+#         self.include_example_output = include_example_output
+#         self.config = config_json
 
-        if self.use_rag | self.add_system_rag:    
-            self.one_shot_prompt = inject_metaprompt(self.one_shot_example, 
-                                                     ds, 
-                                                     example_out=True, 
-                                                     paper_len=None,
-                                                     include_metadata=self.include_metadata,
-                                                     include_example_output=include_example_output,
-                                                     base_prompt_top=self.base_prompt_top)
+#         if self.use_rag | self.add_system_rag:    
+#             self.one_shot_prompt = inject_metaprompt(self.one_shot_example, 
+#                                                      ds, 
+#                                                      example_out=True, 
+#                                                      paper_len=None,
+#                                                      include_metadata=self.include_metadata,
+#                                                      include_example_output=include_example_output,
+#                                                      base_prompt_top=self.base_prompt_top)
   
-        if system_direction is None:
-            self.system_directions =  "The user would like to know more information about specific items of genomic data\n\
-            Please provide clear and concise answers.\n\
-            Only state what you know to be true and if something is unclear please state that clearly or indicate that you do not\
-            know the answer"
-        else:
-            self.system_directions = system_direction
+#         if system_direction is None:
+#             self.system_directions =  "The user would like to know more information about specific items of genomic data\n\
+#             Please provide clear and concise answers.\n\
+#             Only state what you know to be true and if something is unclear please state that clearly or indicate that you do not\
+#             know the answer"
+#         else:
+#             self.system_directions = system_direction
                                                            
        
-    def build_one_shot_prompt(target_key, example_output, paper_len=None):
-        prompt = inject_metaprompt(target_key, self.ds, example_out=True)
+#     def build_one_shot_prompt(target_key, example_output, paper_len=None):
+#         prompt = inject_metaprompt(target_key, self.ds, example_out=True)
     
-    #build the user prompt in question
-    def get_user_prompt(self, 
-                        target_key, 
-                        paper_len=None,
-                        debug=False,
-                        ):
-        return inject_metaprompt(target_key, 
-                                 self.ds, 
-                                 example_out=self.response_template, 
-                                 paper_len=paper_len,
-                                 include_example_output=None,
-                                 debug_prompt=debug,
-                                 base_prompt_top=self.base_prompt_top,)
+#     #build the user prompt in question
+#     def get_user_prompt(self, 
+#                         target_key, 
+#                         paper_len=None,
+#                         debug=False,
+#                         ):
+#         return inject_metaprompt(target_key, 
+#                                  self.ds, 
+#                                  example_out=self.response_template, 
+#                                  paper_len=paper_len,
+#                                  include_example_output=None,
+#                                  debug_prompt=debug,
+#                                  base_prompt_top=self.base_prompt_top,)
 
     
-    def build_full_prompt(self, 
-                          target_key, 
-                          append_prompts=False, 
-                          paper_len=None,
-                          debug=False,):
-                        #   base_prompt_top=self.base_prompt_top):
-        # user_prompt, base_prompt = self.get_user_prompt(target_key, 
-        #                                                 paper_len=None,
-        #                                                 debug=debug,
-        #                                                 )
-        p = Prompt(self.ds, target_key)
-        user_prompt, base_prompt = p.build_prompt()
-        if append_prompts:
-            if self.use_rag:
-                '''
-                prompt will look like this
-                (1) system_directions -- role: system
-                (2) User prompt -- role: user
-                     (a) Rag example (paper + annotated json)
-                     (b) Paper in question
-                     (c) Json template
-                '''
-                user_prompt = self.one_shot_prompt + user_prompt
-            if self.double_directions:
-                '''
-                prompt will look like this
-                (1) system_directions -- role: system
-                (2) User prompt -- role: user
-                     (a) Rag example (paper + annotated json)
-                     (b) Paper in question
-                     (c) Json template
-                     (d) system direction -- emphasize/remind model
-                '''
-                user_prompt = user_prompt + self.system_directions
-                full_prompt = construct_prompt(system=self.system_directions,
-                                           user=user_prompt)
-        return full_prompt, target_key, self.ds.get_paper_name(target_key), base_prompt
+#     def build_full_prompt(self, 
+#                           target_key, 
+#                           append_prompts=False, 
+#                           paper_len=None,
+#                           debug=False,):
+#                         #   base_prompt_top=self.base_prompt_top):
+#         # user_prompt, base_prompt = self.get_user_prompt(target_key, 
+#         #                                                 paper_len=None,
+#         #                                                 debug=debug,
+#         #                                                 )
+#         p = Prompt(self.ds, target_key)
+#         user_prompt, base_prompt = p.build_prompt()
+#         if append_prompts:
+#             if self.use_rag:
+#                 '''
+#                 prompt will look like this
+#                 (1) system_directions -- role: system
+#                 (2) User prompt -- role: user
+#                      (a) Rag example (paper + annotated json)
+#                      (b) Paper in question
+#                      (c) Json template
+#                 '''
+#                 user_prompt = self.one_shot_prompt + user_prompt
+#             if self.double_directions:
+#                 '''
+#                 prompt will look like this
+#                 (1) system_directions -- role: system
+#                 (2) User prompt -- role: user
+#                      (a) Rag example (paper + annotated json)
+#                      (b) Paper in question
+#                      (c) Json template
+#                      (d) system direction -- emphasize/remind model
+#                 '''
+#                 user_prompt = user_prompt + self.system_directions
+#                 full_prompt = construct_prompt(system=self.system_directions,
+#                                            user=user_prompt)
+#         return full_prompt, target_key, self.ds.get_paper_name(target_key), base_prompt
     
     
 '''
