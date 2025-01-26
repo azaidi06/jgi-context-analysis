@@ -243,7 +243,7 @@ class PromptModule():
         return self.front_position + self.middle_position + self.end_position
 
 '''
-Prompt looks like this: [Based on prompt module code above!]
+Prompt could look like this: [Based on PromptModule + GenericPrompt classes]
     [0] Pre Module
         A) Front 
         B) Middle
@@ -258,7 +258,6 @@ Prompt looks like this: [Based on prompt module code above!]
         C) End --> Normally NOT used
 
 '''
-
 class GenericPrompt():
     def __init__(self,
                 dataset,
@@ -297,19 +296,6 @@ class GenericPrompt():
         self.prompt = self.build_prompt()
 
 
-    # def build_prompt(self):
-    #     # should extend to 5 in the case of yes to paper, example output and 3 different prompts input?
-    #     idxs = [x for x in range(3)] # list [1,2,3]
-    #     prompt_dict = {x: '' for x in range(3)} # creates dict {1:'', 2:'', 3:''}
-    #     prompt_dict[0] = self.prompt_front
-    #     prompt_dict[1] = self.prompt_middle
-    #     prompt_dict[2] = self.prompt_end
-    #     if self.include_paper:
-    #         prompt_dict[1] = prompt_dict[1] + self.paper
-    #     if self.include_example_output:
-    #         prompt_dict[2] = prompt_dict[2] + self.example_output
-    #     return '\n'.join(list(prompt_dict.values()))
-
     def build_prompt(self):
         sections = [self.prompt_front, self.prompt_middle, self.prompt_end]
         if self.include_paper:
@@ -330,16 +316,6 @@ class GenericPrompt():
             paper = paper[:self.paper_length]
         return paper
     
-    # If the prompt is RAG --> pull relevant json
-    # If not rag but want example_output --> pull the template
-    # def get_example_output_file(self):
-    #     if self.include_rag_example:
-    #         example_output_path = f'labels/{self.paper_name}_{self.target_key}.json'
-    #     else:
-    #         example_output_path = 'labels/response_template.json'
-    #     example_output = get_json(example_output_path)
-    #     example_output = json.dumps(example_output)
-    #     return example_output
 
     def get_example_output_file(self):
         path = (
