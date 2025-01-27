@@ -1,5 +1,6 @@
 import os
-os.environ['HF_HOME'] = '/pscratch/sd/a/azaidi/llm/cache'
+# comment out line below if running locally and NOT on perlmutter
+#os.environ['HF_HOME'] = '/pscratch/sd/a/azaidi/llm/cache'
 from tqdm import tqdm
 import datetime
 import pandas as pd
@@ -91,6 +92,8 @@ def get_4bit_config():
 
 #can pass in l8,l70 or l405 -- or can just pass the full model_name
 def get_model_name(model_name='l70'):
+    if model_name == 'l1':
+        model_name = "meta-llama/Llama-3.2-1B-Instruct"
     if model_name == 'l8':
         model_name = "meta-llama/Llama-3.1-8B-Instruct"
     if model_name == 'l70':
@@ -102,6 +105,13 @@ def get_model_name(model_name='l70'):
     return model_name
 
 
+def determine_hardware():
+    device = torch.device("cuda" if torch.cuda.is_available()
+                          #else "" if torch.backends.mps.is_available() 
+                          else "cpu")
+    return device
+
+
 def get_pipeline(model='l8', 
                  four_bit=False, 
                  eigth_bit=False,
@@ -110,7 +120,9 @@ def get_pipeline(model='l8',
     model_name = get_model_name(model)
     # Get appropriate quantization config values
     quantization_config = get_quant_config(four_bit=four_bit, eigth_bit=eigth_bit)
-    
+    if determine_hardware() != 'cuda':
+        cpu = determine_hardware()
+        device =  cpu
     pipeline = transformers.pipeline(
             "text-generation",
             model=model_name,
@@ -122,6 +134,10 @@ def get_pipeline(model='l8',
             )
     return pipeline
 
+def get_debug_pipeline():
+    pipeline = transformers.pipeline("text-generation", 
+                                     model="unsloth/Llama-3.2-1B-Instruct")
+    return pipeline
 
 ## temperature and top_p defaults are from llama3 docs:
 ## https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct
