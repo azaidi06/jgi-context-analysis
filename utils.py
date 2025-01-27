@@ -428,46 +428,35 @@ def run_model(pipeline, ds,
     if trial_name is None:
         trial_name = f'testing_{time}'
     make_trial_folder(f'results/{trial_name}')
-    for x in tqdm(range(num_samples)):
-        if one_shot_ids:
-            one_shot_key = one_shot_ids[x]
-            if one_shot_key is None:
-                        one_shot_pmcid = None
-            else:
-                        one_shot_pmcid = ds.key_paper_dict[one_shot_key]
-            # all of the above if/then to determine how to log one_shot_example
-                        
-            pb = PromptBuilder(ds, system_direction=system_dir,
-                               one_shot_example=one_shot_key,
-                               system_rag = system_rag,
-                               user_rag = user_rag,
-                               double_directions = double_directions,
-                               base_prompt_top=base_prompt_top,
-                               paper_followup_prompt=paper_followup_prompt,
-                               include_example_output=include_example_output,
-                              )
-
-        if print_prog: print(x)
+    for x in tqdm(range(num_samples)):            
+        GenP = GenericPrompt(ds, 
+                                 ds.target_keys[0],
+                                 #prompt_front=f'We are trying to determine the role of {ds.target_keys[0]} in a scientific paper',
+                                 prompt_front=f'Testing FRONT',
+                                 include_paper=False,
+                                 prompt_end=f'END ONE\n------\n',
+                                 include_example_output=False)
+        pmodule = PromptModule(GenP)
+        prompt = construct_prompt(system_dir, pmodule)
+        tar_key = GenP.target_key
+        pmcid = GenP.paper_name
+        base_prompt = GenP.prompt_front
+        
         if len(target_keys) > 1:
             target_key = target_keys[x]
         else:
             target_key = target_keys[0]
-        prompt, tar_key, pmcid, base_prompt = pb.build_full_prompt(target_key,
-                                                     append_prompts=append_prompts,
-                                                     debug=debug_prompt)
         holder.append(log_output(pipeline, 
                                  prompt, 
                                  tar_key, 
                                  pmcid, 
-                                 one_shot_key=one_shot_key, 
-                                 one_shot_pmcid=one_shot_pmcid,
+                                 one_shot_key=None, 
+                                 one_shot_pmcid=None,
                                  max_new_tokens=max_new_tokens, 
                                  temp=temp, 
                                  append_prompts=append_prompts,
                                  base_prompt=base_prompt))
         df = pd.concat(holder).reset_index(drop=True)
-        df.attrs['time'] = time
-        df.attrs['date'] = date
     if user_rag | system_rag: #one target key to many rag examples
         csv_name = f'results/{trial_name}/{csv_name}_{model_type}_{target_key}.csv'
     else: # bunch of target keys and rag examples, so one csv title works

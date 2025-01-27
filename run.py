@@ -1,7 +1,7 @@
 #!/bin/bash/python
 
 import os
-os.environ['HF_HOME'] = '/pscratch/sd/a/azaidi/llm/cache'
+#os.environ['HF_HOME'] = '/pscratch/sd/a/azaidi/llm/cache'
 
 from utils import *
 from tqdm import tqdm
@@ -26,8 +26,8 @@ if __name__ == "__main__":
     Now lets get our model
         To-do: make this a field that can be set in the json -- default to llama 8
     '''
-    model_type = 'l8' #l8 --> llama8B; l70 --> 70B; l405 --> 405B
-    pipeline = get_pipeline(model_type, eigth_bit=False, four_bit=True,)
+    model_type = 'l1' #l8 --> llama8B; l70 --> 70B; l405 --> 405B
+    pipeline = get_pipeline(model_type, eigth_bit=False, four_bit=False,)
     print(f'got pipeline: we are using {model_type}\n')
     
     
@@ -69,5 +69,4 @@ if __name__ == "__main__":
                        base_prompt_top=base_prompt_top,
                        paper_followup_prompt=paper_followup_prompt,
                        include_example_output=False,)
-    
     print(out_df.shape)
