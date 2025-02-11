@@ -1,7 +1,8 @@
 #!/bin/bash/python
 
 import os
-#os.environ['HF_HOME'] = '/pscratch/sd/a/azaidi/llm/cache'
+# comment the line below if using locally
+os.environ['HF_HOME'] = '/pscratch/sd/a/azaidi/llm/cache'
 
 from utils import *
 from tqdm import tqdm
@@ -59,7 +60,6 @@ if __name__ == "__main__":
                        system_dir=system_dirs,
                        num_samples=2,  #len(identifiers), 
                        target_keys=identifiers,
-                       append_prompts=True, 
                        print_prog=False, 
                        one_shot_ids=None, 
                        save=True,

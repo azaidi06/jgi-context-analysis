@@ -243,9 +243,9 @@ class PromptModule():
         or anything else can be added
     '''
     def __init__(self,
-                 front_position=None,
-                 middle_position=None,
-                 end_position=None,
+                 front_position='',
+                 middle_position='',
+                 end_position='',
                 ):
         self.front_position = front_position
         self.middle_position = middle_position
@@ -278,7 +278,7 @@ class GenericPrompt():
     def __init__(self,
                 dataset,
                 target_key, 
-                include_metadata=False,
+                include_metadata=False, # NOT BEING USED right now
                 prompt_front='', # [A]  ALWAYS includes text (never paper or json)
                 prompt_middle='', # [B] i.e. here's the paper in question:
                 prompt_end='', # [C]
@@ -371,26 +371,22 @@ def log_output(pipeline,
                max_new_tokens=100, 
                temp=0.6, 
                top_p=0.9, 
-               append_prompts=False,
                base_prompt=None,
                config_json=None):
     df = get_log_df()
-    output = get_output(pipeline, prompt, max_new_tokens=max_new_tokens,
-                        temp=temp, top_p=top_p)
-    
+    #output = get_output(pipeline, prompt, max_new_tokens=max_new_tokens,
+    #                    temp=temp, top_p=top_p)
+    output = ''
     '''
     NOT COOL
     ** Want to log the json ** 
     '''
-    if append_prompts:
-         df.loc[0] = [target_key, pmcid,
-                      one_shot_key, one_shot_pmcid,
-                      prompt[0]['content'], "None", base_prompt,#prompt[1]['content'],
-                      output, temp, top_p, max_new_tokens]
-    else:
-        df.loc[0] = [target_key, pmcid,
-                     prompt[0]['content'], prompt[1]['content'], prompt[2]['content'],
-                     output, temp, top_p, max_new_tokens]
+    # import pdb
+    # pdb.set_trace()
+    df.loc[0] = [target_key, pmcid,
+                one_shot_key, one_shot_pmcid,
+                prompt[0]['content'], "None", base_prompt,#prompt[1]['content'],
+                output, temp, top_p, max_new_tokens]
     return df
 
 
@@ -406,7 +402,7 @@ def run_model(pipeline, ds,
                            #'CP000046'
               ],
               one_shot_ids = None,
-              append_prompts=False, 
+              #append_prompts=False, 
               max_new_tokens=250, 
               temp=0.025, 
               csv_name=None,
@@ -436,25 +432,28 @@ def run_model(pipeline, ds,
                                  include_paper=False,
                                  prompt_end=f'END ONE\n------\n',
                                  include_example_output=False)
-        pmodule = PromptModule(GenP)
-        prompt = construct_prompt(system_dir, pmodule)
-        tar_key = GenP.target_key
+        # import pdb
+        # pdb.set_trace()
+        pmodule = PromptModule(GenP.prompt)
+        prompt = construct_prompt(system=system_dir, 
+                                  user=pmodule.full_prompt)
+        target_key = GenP.target_key
         pmcid = GenP.paper_name
         base_prompt = GenP.prompt_front
         
-        if len(target_keys) > 1:
-            target_key = target_keys[x]
-        else:
-            target_key = target_keys[0]
+        # if len(target_keys) > 1:
+        #     target_key = target_keys[x]
+        # else:
+        #     target_key = target_keys[0]
         holder.append(log_output(pipeline, 
                                  prompt, 
-                                 tar_key, 
+                                 target_key, 
                                  pmcid, 
                                  one_shot_key=None, 
                                  one_shot_pmcid=None,
                                  max_new_tokens=max_new_tokens, 
                                  temp=temp, 
-                                 append_prompts=append_prompts,
+                                 #append_prompts=append_prompts,
                                  base_prompt=base_prompt))
         df = pd.concat(holder).reset_index(drop=True)
     if user_rag | system_rag: #one target key to many rag examples
