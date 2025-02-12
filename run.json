@@ -1,7 +1,13 @@
 {
-    "model": "l8",
-    "system_directions" : "",
-    "prompt_base" : "", 
-    "pre_paper_prompt" : "", 
-    "post_paper_prompt" : ""
+    "trial_name": "testing",
+    "debug_mode": false,
+    "fast_debug": false,
+    "model_type": "l1",
+    "system_directions" : "TESTING\n\n\n",
+    "prompt_front" : "--------", 
+    "prompt_middle" : "middle\n\n\n", 
+    "prompt_end" : "******",
+    "include_paper": "",
+    "include_rag_example": true,
+    "include_example_output": false
 }

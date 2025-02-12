@@ -397,7 +397,6 @@ def log_output(pipeline,
 
 
 def run_model(pipeline, ds,
-              system_dir,
               model_type,
               num_samples=10,
               target_keys=['CP000029',
@@ -412,11 +411,13 @@ def run_model(pipeline, ds,
               trial_name=None,
               save=False,
               print_prog=False,
-              system_rag = False,
               user_rag = False,
-              double_directions = True,
-              base_prompt_top=None,
-              paper_followup_prompt=None,
+              #base_prompt_top=None,
+              #paper_followup_prompt=None,
+              system_directions='',
+              prompt_front='',
+              prompt_middle='',
+              prompt_end='',
               include_example_output=False,
               debug_prompt=False,
              ):
@@ -429,25 +430,21 @@ def run_model(pipeline, ds,
     make_trial_folder(f'results/{trial_name}')
     for x in tqdm(range(num_samples)):            
         GenP = GenericPrompt(ds, 
-                                 ds.target_keys[0],
-                                 #prompt_front=f'We are trying to determine the role of {ds.target_keys[0]} in a scientific paper',
-                                 prompt_front=f'Testing FRONT',
-                                 include_paper=False,
-                                 prompt_end=f'END ONE\n------\n',
-                                 include_example_output=False)
+                            ds.target_keys[0],
+                            prompt_front=prompt_front,
+                            prompt_middle=prompt_middle,
+                            prompt_end=prompt_end,
+                            include_paper=False,
+                            include_example_output=False)
         # import pdb
         # pdb.set_trace()
         pmodule = PromptModule(GenP.prompt)
-        prompt = construct_prompt(system=system_dir, 
+        prompt = construct_prompt(system=system_directions, 
                                   user=pmodule.full_prompt)
         target_key = GenP.target_key
         pmcid = GenP.paper_name
         base_prompt = GenP.prompt_front
         
-        # if len(target_keys) > 1:
-        #     target_key = target_keys[x]
-        # else:
-        #     target_key = target_keys[0]
         holder.append(log_output(pipeline, 
                                  prompt, 
                                  target_key, 
@@ -458,7 +455,7 @@ def run_model(pipeline, ds,
                                  temp=temp, 
                                  base_prompt=base_prompt))
         df = pd.concat(holder).reset_index(drop=True)
-    if user_rag | system_rag: #one target key to many rag examples
+    if user_rag: #one target key to many rag examples
         csv_name = f'results/{trial_name}/{csv_name}_{model_type}_{target_key}.csv'
     else: # bunch of target keys and rag examples, so one csv title works
         csv_name = f'results/{trial_name}/{model_type}.csv'
