@@ -310,8 +310,12 @@ class GenericPrompt():
         self.example_output = self.get_example_output_file()
 
         self.prompt = self.build_prompt()
+        self.bare_prompt = self.build_bare_prompt()
 
-
+    def build_bare_prompt(self):
+        sections = [self.prompt_front, self.prompt_middle, self.prompt_end]
+        return '\n'.join(sections)
+    
     def build_prompt(self):
         sections = [self.prompt_front, self.prompt_middle, self.prompt_end]
         if self.include_paper:
@@ -348,7 +352,7 @@ Too hardcoded -- can the prompt info all be in one column?
 '''
 def get_log_df():
     return pd.DataFrame(columns=['target_key', 
-                                 'pmcid', 
+                                 'target_pmcid', 
                                  'one_shot_key', 
                                  'one_shot_pmcid',
                                  'system_directions', 
@@ -402,7 +406,6 @@ def run_model(pipeline, ds,
                            #'CP000046'
               ],
               one_shot_ids = None,
-              #append_prompts=False, 
               max_new_tokens=250, 
               temp=0.025, 
               csv_name=None,
@@ -453,7 +456,6 @@ def run_model(pipeline, ds,
                                  one_shot_pmcid=None,
                                  max_new_tokens=max_new_tokens, 
                                  temp=temp, 
-                                 #append_prompts=append_prompts,
                                  base_prompt=base_prompt))
         df = pd.concat(holder).reset_index(drop=True)
     if user_rag | system_rag: #one target key to many rag examples
