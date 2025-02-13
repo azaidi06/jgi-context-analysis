@@ -4,6 +4,7 @@ import os
 # comment the line below if using locally
 os.environ['HF_HOME'] = '/pscratch/sd/a/azaidi/llm/cache'
 
+import pdb
 from utils import *
 from tqdm import tqdm
 import argparse
@@ -15,8 +16,6 @@ if __name__ == "__main__":
     config_path = parser.parse_args().config
     with open(config_path, 'r') as config_fp:
         config = json.load(config_fp)
-    import pdb
-    #$pdb.set_trace()
     debug_mode = True
 
     print('starting')
@@ -32,16 +31,16 @@ if __name__ == "__main__":
         To-do: make this a field that can be set in the json -- default to llama 8
     '''
     model_type = config['model_type']
-    pipeline = get_pipeline(model_type, eigth_bit=False, four_bit=False,)
+    #pipeline = get_pipeline(model_type, eigth_bit=False, four_bit=False,)
     print(f'got pipeline: we are using {model_type}\n')
-    
-    #system_dirs = config['system_directions']
+    pipeline=None
 
     identifiers = get_test_target_keys()
     if debug_mode: 
         print(f'These are the identifiers we are looking at: {identifiers}')
     
-    import pdb; pdb.set_trace()
+    #run_model(pipeline, ds, config, target_keys)
+    #pdb.set_trace()
     out_df = run_model(pipeline, 
                        ds,
                        model_type=model_type,

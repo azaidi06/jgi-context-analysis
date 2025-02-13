@@ -10,6 +10,7 @@ import argparse
 import json
 import torch
 import json
+import pdb
 
 
 def read_paper(paper_name):
@@ -274,7 +275,7 @@ Prompt could look like this: [Based on PromptModule + GenericPrompt classes]
         C) End --> Normally NOT used
 
 '''
-class GenericPrompt():
+class   GenericPrompt():
     def __init__(self,
                 dataset,
                 target_key, 
@@ -282,7 +283,7 @@ class GenericPrompt():
                 prompt_front='', # [A]  ALWAYS includes text (never paper or json)
                 prompt_middle='', # [B] i.e. here's the paper in question:
                 prompt_end='', # [C]
-                include_rag_example=False, # pulls relevant rag based on target key
+                include_rag_example=False, # pulls relevant rag based on target key provided
                 include_example_output=2, # Position 3
                 include_paper=1, # Middle prompt
                 paper_length=None
@@ -364,6 +365,19 @@ def get_log_df():
                                  'max_new_tokens'])
 
 '''
+        Can just pass pmdoule to log_output
+        pipeline, system_directions, pmodule
+        
+        * pmodule --> prompt, target_key, pmcid, 
+                    one_shot_key/pmcid, bare_prompt
+'''
+def new_log_output(output, pmodule, config, output_path):
+    config['output'] = output
+    with open(f'{output_path}/output.json', "w") as f:
+        json.dump(data, f, indent=4)
+
+
+'''
 This needs alot of work
 '''
 def log_output(pipeline, 
@@ -392,18 +406,31 @@ def log_output(pipeline,
                 prompt[0]['content'], "None", base_prompt,#prompt[1]['content'],
                 output, temp, top_p, max_new_tokens]
     return df
+'''
+/output_file
+    /results
+        jsons
+    log dataframe
+    input json
+'''
+
+def setup_output_directory(trial_name, 
+                           parent_directory=None):
+    date, time = get_time()
+    if parent_directory is None:
+        parent_directory = 'results'
+    if trial_name is None:
+        trial_name = f'testing_{time}'
+    output_directory = f'{parent_directory}/{trial_name}'
+    make_trial_folder(output_directory)
+    return output_directory
 
 
-
-
-def run_model(pipeline, ds,
+def run_model(pipeline, 
+              ds,
               model_type,
               num_samples=10,
-              target_keys=['CP000029',
-                          #'MINA00000000',
-                           # 'CU928158'
-                           #'CP000046'
-              ],
+              target_keys=['CP000029',], # want this to be a list that we iterate over
               one_shot_ids = None,
               max_new_tokens=250, 
               temp=0.025, 
@@ -412,8 +439,6 @@ def run_model(pipeline, ds,
               save=False,
               print_prog=False,
               user_rag = False,
-              #base_prompt_top=None,
-              #paper_followup_prompt=None,
               system_directions='',
               prompt_front='',
               prompt_middle='',
@@ -424,27 +449,36 @@ def run_model(pipeline, ds,
     holder = []
     if one_shot_ids is None:
         one_shot_ids = [None for x in range(num_samples)]
-    date, time = get_time()
-    if trial_name is None:
-        trial_name = f'testing_{time}'
-    make_trial_folder(f'results/{trial_name}')
+
+    output_directory = setup_output_directory(trial_name)
+
     for x in tqdm(range(num_samples)):            
         GenP = GenericPrompt(ds, 
-                            ds.target_keys[0],
+                            ds.target_keys[x],
                             prompt_front=prompt_front,
                             prompt_middle=prompt_middle,
                             prompt_end=prompt_end,
                             include_paper=False,
                             include_example_output=False)
-        # import pdb
-        # pdb.set_trace()
+        
         pmodule = PromptModule(GenP.prompt)
         prompt = construct_prompt(system=system_directions, 
                                   user=pmodule.full_prompt)
         target_key = GenP.target_key
         pmcid = GenP.paper_name
-        base_prompt = GenP.prompt_front
+        bare_prompt = GenP.bare_prompt
         
+        pdb.set_trace()
+        '''
+        Can just pass pmdoule to log_output
+        pipeline, system_directions, pmodule
+        
+        * pmodule --> prompt, target_key, pmcid, 
+                    one_shot_key/pmcid, bare_prompt
+
+        log_output(pipeline, pmodule, config, output_directory):
+        '''
+
         holder.append(log_output(pipeline, 
                                  prompt, 
                                  target_key, 

@@ -1,6 +1,6 @@
 {
     "trial_name": "testing",
-    "debug_mode": false,
+    "debug_mode": true,
     "fast_debug": false,
     "model_type": "l1",
     "system_directions" : "TESTING\n\n\n",
@@ -9,5 +9,7 @@
     "prompt_end" : "******",
     "include_paper": false,
     "include_rag_example": true,
-    "include_example_output": false
+    "include_example_output": false,
+    "max_new_tokens": 250,
+    "temperature" : 0.025
 }
