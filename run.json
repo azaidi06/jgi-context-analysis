@@ -7,7 +7,7 @@
     "prompt_front" : "--------", 
     "prompt_middle" : "middle\n\n\n", 
     "prompt_end" : "******",
-    "include_paper": "",
+    "include_paper": false,
     "include_rag_example": true,
     "include_example_output": false
 }
