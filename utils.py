@@ -386,36 +386,6 @@ def new_log_output(output,
     with open(f'{file_name}.json', "w") as f:
         json.dump(config, f, indent=4)
 
-
-'''
-This needs alot of work
-'''
-def log_output(pipeline, 
-               prompt, 
-               target_key, 
-               pmcid, 
-               one_shot_key, 
-               one_shot_pmcid, 
-               max_new_tokens=100, 
-               temp=0.6, 
-               top_p=0.9, 
-               base_prompt=None,
-               config_json=None):
-    df = get_log_df()
-    #output = get_output(pipeline, prompt, max_new_tokens=max_new_tokens,
-    #                    temp=temp, top_p=top_p)
-    output = ''
-    '''
-    NOT COOL
-    ** Want to log the json ** 
-    '''
-    # import pdb
-    # pdb.set_trace()
-    df.loc[0] = [target_key, pmcid,
-                one_shot_key, one_shot_pmcid,
-                prompt[0]['content'], "None", base_prompt,#prompt[1]['content'],
-                output, temp, top_p, max_new_tokens]
-    return df
 '''
 /output_file
     /results
@@ -435,7 +405,6 @@ def setup_output_directory(trial_name,
     make_trial_folder(output_directory)
     return output_directory
 
-## one_shot_ids
 
 def run_model(pipeline, ds, config, rag_keys=None):
     model_type = config['model_type']
@@ -457,7 +426,6 @@ def run_model(pipeline, ds, config, rag_keys=None):
     #if rag_keys is None:
     #    rag_keys = [None for x in range(num_samples)]
     output_directory = setup_output_directory(trial_name)
-    #pdb.set_trace()
     for x in tqdm(range(num_samples)):            
         GenP = GenericPrompt(ds, 
                             ds.target_keys[x],
@@ -478,28 +446,12 @@ def run_model(pipeline, ds, config, rag_keys=None):
                             max_new_tokens=max_new_tokens,
                             temp=temp, 
                             top_p=0.9)
-        holder.append(log_output(pipeline, 
-                                 prompt, 
-                                 target_key, 
-                                 pmcid, 
-                                 one_shot_key=None, 
-                                 one_shot_pmcid=None,
-                                 max_new_tokens=max_new_tokens, 
-                                 temp=temp, 
-                                 base_prompt=bare_prompt))
-        df = pd.concat(holder).reset_index(drop=True)
         new_log_output(#output='meow', 
                 output=output,
                 pmodule=pmodule, 
                 config=config, 
                 output_path=output_directory,
                 target_key=target_key)
-    #if user_rag: #one target key to many rag examples
-    #    csv_name = f'results/{trial_name}/{csv_name}_{model_type}_{target_key}.csv'
-    #else: # bunch of target keys and rag examples, so one csv title works
-    #    csv_name = f'results/{trial_name}/{model_type}.csv'
-    #if save:
-    #    df.to_csv(csv_name, index=False)
     return df
 
 
