@@ -2,7 +2,7 @@
 
 import os
 # comment the line below if using locally
-os.environ['HF_HOME'] = '/pscratch/sd/a/azaidi/llm/cache'
+#os.environ['HF_HOME'] = '/pscratch/sd/a/azaidi/llm/cache'
 
 import pdb
 from utils import *
@@ -41,22 +41,25 @@ if __name__ == "__main__":
     
     #run_model(pipeline, ds, config, target_keys)
     #pdb.set_trace()
-    out_df = run_model(pipeline, 
-                       ds,
-                       model_type=model_type,
-                       num_samples=2,  #len(identifiers), 
-                       target_keys=identifiers,
-                       print_prog=False, 
-                       one_shot_ids=None, 
-                       save=True,
-                       trial_name = config['trial_name'],
-                       csv_name=None,
-                       debug_prompt=True,
-                       system_directions = config['system_directions'],
-                       prompt_front = config['prompt_front'],
-                       prompt_middle = config['prompt_middle'],
-                       prompt_end = config['prompt_end'],
-                       include_example_output=False,)
+    out_df = run_model(pipeline=pipeline,
+                       ds=ds, 
+                       config=config)
+    # out_df = run_model(pipeline, 
+    #                    ds,
+    #                    model_type=model_type,
+    #                    num_samples=2,  #len(identifiers), 
+    #                    target_keys=identifiers,
+    #                    print_prog=False, 
+    #                    one_shot_ids=None, 
+    #                    save=True,
+    #                    trial_name = config['trial_name'],
+    #                    csv_name=None,
+    #                    debug_prompt=True,
+    #                    system_directions = config['system_directions'],
+    #                    prompt_front = config['prompt_front'],
+    #                    prompt_middle = config['prompt_middle'],
+    #                    prompt_end = config['prompt_end'],
+    #                    include_example_output=False,)
     print(out_df.shape)
 
 ''' 

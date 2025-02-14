@@ -374,7 +374,7 @@ def get_log_df():
 def new_log_output(output, pmodule, config, output_path):
     config['output'] = output
     with open(f'{output_path}/output.json', "w") as f:
-        json.dump(data, f, indent=4)
+        json.dump(config, f, indent=4)
 
 
 '''
@@ -426,32 +426,49 @@ def setup_output_directory(trial_name,
     return output_directory
 
 
-def run_model(pipeline, 
-              ds,
-              model_type,
-              num_samples=10,
-              target_keys=['CP000029',], # want this to be a list that we iterate over
-              one_shot_ids = None,
-              max_new_tokens=250, 
-              temp=0.025, 
-              csv_name=None,
-              trial_name=None,
-              save=False,
-              print_prog=False,
-              user_rag = False,
-              system_directions='',
-              prompt_front='',
-              prompt_middle='',
-              prompt_end='',
-              include_example_output=False,
-              debug_prompt=False,
-             ):
+# def run_model(pipeline, 
+#               ds,
+#               config,
+              #model_type,
+              #num_samples=10, #needs to be at or below #of target keys
+              #target_keys=['CP000029',], # want this to be a list that we iterate over
+              #one_shot_ids = None,
+              #max_new_tokens=250, 
+              #temp=0.025, 
+              #csv_name=None,
+              #trial_name=None,
+              #save=False,
+              #print_prog=False,
+              #user_rag = False,
+              #system_directions='',
+              #prompt_front='',
+              #prompt_middle='',
+              #prompt_end='',
+              #include_example_output=False,
+              #debug_prompt=False,
+            #  ):
+def run_model(pipeline, ds, config, one_shot_ids=None):
+    model_type = config['model_type']
+    num_samples=config['num_samples'] #needs to be at or below #of target keys
+    target_keys=config['target_keys'] # want this to be a list that we iterate over
+    one_shot_ids = config['one_shot_ids']
+    max_new_tokens=config['max_new_tokens'] 
+    temp = config['temperature']
+    csv_name = config['trial_name']
+    trial_name = config['trial_name']
+    save=True,
+    user_rag = config['include_rag_example']
+    system_directions=config['system_directions']
+    prompt_front=config['prompt_front']
+    prompt_middle = config['prompt_middle']
+    prompt_end = config['prompt_end']
+    include_example_output=config['include_example_output']
     holder = []
     if one_shot_ids is None:
         one_shot_ids = [None for x in range(num_samples)]
 
     output_directory = setup_output_directory(trial_name)
-
+    #pdb.set_trace()
     for x in tqdm(range(num_samples)):            
         GenP = GenericPrompt(ds, 
                             ds.target_keys[x],
@@ -468,7 +485,7 @@ def run_model(pipeline,
         pmcid = GenP.paper_name
         bare_prompt = GenP.bare_prompt
         
-        pdb.set_trace()
+        #pdb.set_trace()
         '''
         Can just pass pmdoule to log_output
         pipeline, system_directions, pmodule
@@ -487,7 +504,7 @@ def run_model(pipeline,
                                  one_shot_pmcid=None,
                                  max_new_tokens=max_new_tokens, 
                                  temp=temp, 
-                                 base_prompt=base_prompt))
+                                 base_prompt=bare_prompt))
         df = pd.concat(holder).reset_index(drop=True)
     if user_rag: #one target key to many rag examples
         csv_name = f'results/{trial_name}/{csv_name}_{model_type}_{target_key}.csv'
@@ -495,6 +512,12 @@ def run_model(pipeline,
         csv_name = f'results/{trial_name}/{model_type}.csv'
     if save:
         df.to_csv(csv_name, index=False)
+    new_log_output(output='meow', 
+                   pmodule=pmodule, 
+                   config=config, 
+                   output_path=output_directory)
+    
+
     return df
 
 
