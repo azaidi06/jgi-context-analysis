@@ -20,46 +20,20 @@ if __name__ == "__main__":
 
     print('starting')
     
-    '''
-    Lets get the dataset
-    '''
     ds = jgi_dataset()
     if debug_mode: print('got dataset\n')
     
-    '''
-    Now lets get our model
-        To-do: make this a field that can be set in the json -- default to llama 8
-    '''
     model_type = config['model_type']
-    #pipeline = get_pipeline(model_type, eigth_bit=False, four_bit=False,)
+    pipeline = get_pipeline(model_type, eigth_bit=False, four_bit=False,)
     print(f'got pipeline: we are using {model_type}\n')
-    pipeline=None
 
     identifiers = get_test_target_keys()
     if debug_mode: 
         print(f'These are the identifiers we are looking at: {identifiers}')
-    
-    #run_model(pipeline, ds, config, target_keys)
-    #pdb.set_trace()
+
     out_df = run_model(pipeline=pipeline,
                        ds=ds, 
                        config=config)
-    # out_df = run_model(pipeline, 
-    #                    ds,
-    #                    model_type=model_type,
-    #                    num_samples=2,  #len(identifiers), 
-    #                    target_keys=identifiers,
-    #                    print_prog=False, 
-    #                    one_shot_ids=None, 
-    #                    save=True,
-    #                    trial_name = config['trial_name'],
-    #                    csv_name=None,
-    #                    debug_prompt=True,
-    #                    system_directions = config['system_directions'],
-    #                    prompt_front = config['prompt_front'],
-    #                    prompt_middle = config['prompt_middle'],
-    #                    prompt_end = config['prompt_end'],
-    #                    include_example_output=False,)
     print(out_df.shape)
 
 ''' 

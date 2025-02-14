@@ -371,9 +371,19 @@ def get_log_df():
         * pmodule --> prompt, target_key, pmcid, 
                     one_shot_key/pmcid, bare_prompt
 '''
-def new_log_output(output, pmodule, config, output_path):
+def new_log_output(output, 
+                   pmodule, 
+                   config, 
+                   output_path,
+                   target_key,
+                   rag_key=None):
+    file_name = f'{output_path}/tk_{target_key}'
     config['output'] = output
-    with open(f'{output_path}/output.json', "w") as f:
+    config['THIS_target_key'] = target_key
+    if rag_key:
+        config['THIS_rag_key'] = rag_key
+        file_name += f'rk_{rag_key}'
+    with open(f'{file_name}.json', "w") as f:
         json.dump(config, f, indent=4)
 
 
@@ -414,7 +424,7 @@ def log_output(pipeline,
     input json
 '''
 
-def setup_output_directory(trial_name, 
+def setup_output_directory(trial_name,
                            parent_directory=None):
     date, time = get_time()
     if parent_directory is None:
@@ -425,33 +435,13 @@ def setup_output_directory(trial_name,
     make_trial_folder(output_directory)
     return output_directory
 
+## one_shot_ids
 
-# def run_model(pipeline, 
-#               ds,
-#               config,
-              #model_type,
-              #num_samples=10, #needs to be at or below #of target keys
-              #target_keys=['CP000029',], # want this to be a list that we iterate over
-              #one_shot_ids = None,
-              #max_new_tokens=250, 
-              #temp=0.025, 
-              #csv_name=None,
-              #trial_name=None,
-              #save=False,
-              #print_prog=False,
-              #user_rag = False,
-              #system_directions='',
-              #prompt_front='',
-              #prompt_middle='',
-              #prompt_end='',
-              #include_example_output=False,
-              #debug_prompt=False,
-            #  ):
-def run_model(pipeline, ds, config, one_shot_ids=None):
+def run_model(pipeline, ds, config, rag_keys=None):
     model_type = config['model_type']
     num_samples=config['num_samples'] #needs to be at or below #of target keys
     target_keys=config['target_keys'] # want this to be a list that we iterate over
-    one_shot_ids = config['one_shot_ids']
+    rag_keys = config['rag_keys']
     max_new_tokens=config['max_new_tokens'] 
     temp = config['temperature']
     csv_name = config['trial_name']
@@ -464,9 +454,8 @@ def run_model(pipeline, ds, config, one_shot_ids=None):
     prompt_end = config['prompt_end']
     include_example_output=config['include_example_output']
     holder = []
-    if one_shot_ids is None:
-        one_shot_ids = [None for x in range(num_samples)]
-
+    #if rag_keys is None:
+    #    rag_keys = [None for x in range(num_samples)]
     output_directory = setup_output_directory(trial_name)
     #pdb.set_trace()
     for x in tqdm(range(num_samples)):            
@@ -484,18 +473,11 @@ def run_model(pipeline, ds, config, one_shot_ids=None):
         target_key = GenP.target_key
         pmcid = GenP.paper_name
         bare_prompt = GenP.bare_prompt
-        
-        #pdb.set_trace()
-        '''
-        Can just pass pmdoule to log_output
-        pipeline, system_directions, pmodule
-        
-        * pmodule --> prompt, target_key, pmcid, 
-                    one_shot_key/pmcid, bare_prompt
-
-        log_output(pipeline, pmodule, config, output_directory):
-        '''
-
+        output = get_output(pipeline, 
+                            prompt, 
+                            max_new_tokens=max_new_tokens,
+                            temp=temp, 
+                            top_p=0.9)
         holder.append(log_output(pipeline, 
                                  prompt, 
                                  target_key, 
@@ -506,18 +488,18 @@ def run_model(pipeline, ds, config, one_shot_ids=None):
                                  temp=temp, 
                                  base_prompt=bare_prompt))
         df = pd.concat(holder).reset_index(drop=True)
-    if user_rag: #one target key to many rag examples
-        csv_name = f'results/{trial_name}/{csv_name}_{model_type}_{target_key}.csv'
-    else: # bunch of target keys and rag examples, so one csv title works
-        csv_name = f'results/{trial_name}/{model_type}.csv'
-    if save:
-        df.to_csv(csv_name, index=False)
-    new_log_output(output='meow', 
-                   pmodule=pmodule, 
-                   config=config, 
-                   output_path=output_directory)
-    
-
+        new_log_output(#output='meow', 
+                output=output,
+                pmodule=pmodule, 
+                config=config, 
+                output_path=output_directory,
+                target_key=target_key)
+    #if user_rag: #one target key to many rag examples
+    #    csv_name = f'results/{trial_name}/{csv_name}_{model_type}_{target_key}.csv'
+    #else: # bunch of target keys and rag examples, so one csv title works
+    #    csv_name = f'results/{trial_name}/{model_type}.csv'
+    #if save:
+    #    df.to_csv(csv_name, index=False)
     return df
 
 

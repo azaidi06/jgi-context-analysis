@@ -4,15 +4,25 @@
     "fast_debug": false,
     "model_type": "l1",
     "system_directions" : "TESTING\n\n\n",
+
+    "target_keys": ["CP000029",
+    "NC_003317",
+    "MINA00000000",
+    "Gs0095506"
+    ],
     "prompt_front" : "--------", 
     "prompt_middle" : "middle\n\n\n", 
     "prompt_end" : "******",
     "include_paper": false,
-    "include_rag_example": true,
     "include_example_output": false,
-    "one_shot_ids": false,
-    "target_keys": ["CP000029"],
-    "num_samples": 1,
+
+    "include_rag_example": true,
+    "rag_prompt_front" : "FOR THE RAG", 
+    "rag_prompt_middle" : "middle raggy\n\n\n", 
+    "rag_prompt_end" : "back rag******",
+    "rag_keys": false,
+
+    "num_samples": 2,
     "max_new_tokens": 250,
     "temperature" : 0.025
 }
