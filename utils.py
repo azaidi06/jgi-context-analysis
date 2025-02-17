@@ -275,7 +275,7 @@ Prompt could look like this: [Based on PromptModule + GenericPrompt classes]
         C) End --> Normally NOT used
 
 '''
-class   GenericPrompt():
+class GenericPrompt():
     def __init__(self,
                 dataset,
                 target_key, 
@@ -347,30 +347,7 @@ class   GenericPrompt():
         data = get_json(path)
         return json.dumps(data)
 
-    
-'''
-Too hardcoded -- can the prompt info all be in one column?
-'''
-def get_log_df():
-    return pd.DataFrame(columns=['target_key', 
-                                 'target_pmcid', 
-                                 'one_shot_key', 
-                                 'one_shot_pmcid',
-                                 'system_directions', 
-                                 'init_user_prompt',
-                                 'user_prompt',
-                                 'output', 
-                                 'temp', 
-                                 'top_p', 
-                                 'max_new_tokens'])
 
-'''
-        Can just pass pmdoule to log_output
-        pipeline, system_directions, pmodule
-        
-        * pmodule --> prompt, target_key, pmcid, 
-                    one_shot_key/pmcid, bare_prompt
-'''
 def new_log_output(output, 
                    pmodule, 
                    config, 
@@ -426,7 +403,16 @@ def run_model(pipeline, ds, config, rag_keys=None):
     #if rag_keys is None:
     #    rag_keys = [None for x in range(num_samples)]
     output_directory = setup_output_directory(trial_name)
-    for x in tqdm(range(num_samples)):            
+    for x in tqdm(range(num_samples)):   
+        if rag_keys:
+            rag_key = rag_keys[x]         
+            rag_prompt = GenericPrompt(ds, 
+                            rag_key,
+                            prompt_front=rag_prompt_front,
+                            prompt_middle=rag_prompt_middle,
+                            prompt_end=rag_prompt_end,
+                            include_paper=False,
+                            include_example_output=False)
         GenP = GenericPrompt(ds, 
                             ds.target_keys[x],
                             prompt_front=prompt_front,
@@ -476,18 +462,3 @@ def get_test_target_keys():
         identifiers = [x[0] if len(x) == 1 else '_'.join(x) for x in prelim_idens]
         identifiers = [ids for ids in identifiers if len(ids) > 2]
         return identifiers
-
-
-def debug_stuff(fast=True): 
-    ds = jgi_dataset()
-    model_type = 'l8'
-    pipeline = get_pipeline(model_type, eigth_bit=False, four_bit=fast,)
-    system_dirs = "The user would like to know more information about specific items of genomic data\n\
-        Please only include information that you were provided in the prompt"
-
-    identifiers = get_test_target_keys()
-
-    pb = PromptBuilder(ds, system_direction=system_dirs,
-                    include_example_output=False,
-                    )
-    return pipeline, pb, identifiers
