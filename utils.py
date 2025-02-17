@@ -22,7 +22,7 @@ def read_paper(paper_name):
     return content.split(delimiter)
 
 
-def construct_prompt(system=None, user=None, assistant=None, previous_chat=None):
+def prompt_builder(system=None, user=None, assistant=None, previous_chat=None):
     '''
     Will better handle multi-turn prompting
     Allows for addition of assistant prompt type
@@ -159,35 +159,6 @@ def get_output(pipeline, prompt, max_new_tokens=100, temp=0.6, top_p=0.9,):
     return outputs[0]["generated_text"]
 
 
-def get_base_df():
-    return pd.DataFrame({}, columns=['system_prompt', 'user_prompt', 'output'])
-
-
-def get_row_df(full_prompt, model_output):
-        df = pd.DataFrame([full_prompt[0]['content'], 
-                           full_prompt[1]['content'], 
-                           model_output],
-                       index=['system_prompt', 'user_prompt', 'output']).T
-        return df
-    
-    
-def store_output(pipeline,
-                 df, 
-                 system_directions=None, 
-                 about_user=None, 
-                 prompt=None, 
-                 max_new_tokens=100, 
-                 temp=0.6, 
-                 top_p=0.9,): #rep_penalty=5.5, length_penalty=1.0):
-    if prompt is None:
-        prompt = "What can you tell me about CP000046.1?" 
-    full_prompt = construct_prompt(system=system_directions, user=prompt)
-    model_output = get_output(pipeline, full_prompt, max_new_tokens=max_new_tokens, temp=temp, top_p=top_p)
-    row_df = get_row_df(full_prompt, model_output)
-    df = pd.concat([df, row_df], ignore_index=True)
-    return df
-
-
 def get_json(path):
     with open(path, 'r') as file:
         json_string = file.read()
@@ -251,11 +222,7 @@ class PromptModule():
         self.front_position = front_position
         self.middle_position = middle_position
         self.end_position = end_position
-        self.full_prompt = construct_prompt(
-            self.front_position,
-            self.middle_position,
-            self.end_position,
-        )
+        self.full_prompt = self.construct_prompt()
     def construct_prompt(self):
         return self.front_position + self.middle_position + self.end_position
 
@@ -283,10 +250,10 @@ class GenericPrompt():
                 prompt_front='', # [A]  ALWAYS includes text (never paper or json)
                 prompt_middle='', # [B] i.e. here's the paper in question:
                 prompt_end='', # [C]
-                include_rag_example=False, # pulls relevant rag based on target key provided
-                include_example_output=2, # Position 3
+                include_example_output=False, # Position 3
                 include_paper=1, # Middle prompt
-                paper_length=None
+                paper_length=None,
+                rag=False,
                 ):
 
         self.dataset = dataset
@@ -306,7 +273,7 @@ class GenericPrompt():
         self.paper_length = paper_length
         self.paper = self.get_paper() # Stored separately bc we don't want to log this
 
-        self.include_rag_example = include_rag_example
+        self.do_rag = rag
         self.include_example_output = include_example_output
         self.example_output = self.get_example_output_file()
 
@@ -339,27 +306,31 @@ class GenericPrompt():
     
 
     def get_example_output_file(self):
+        
         path = (
             f'labels/{self.paper_name}_{self.target_key}.json'
-            if self.include_rag_example
+            if self.do_rag
             else 'labels/response_template.json'
         )
         data = get_json(path)
         return json.dumps(data)
 
 
-def new_log_output(output, 
+def log_output(output, 
                    pmodule, 
                    config, 
                    output_path,
                    target_key,
-                   rag_key=None):
-    file_name = f'{output_path}/tk_{target_key}'
+                   rag_key=None,
+                   prompt=None):
+    file_name = f'{output_path}/_tk:{target_key}'
     config['output'] = output
     config['THIS_target_key'] = target_key
     if rag_key:
         config['THIS_rag_key'] = rag_key
-        file_name += f'rk_{rag_key}'
+        file_name += f'_rk:{rag_key}'
+    if prompt:
+        config['prompt'] = prompt
     with open(f'{file_name}.json', "w") as f:
         json.dump(config, f, indent=4)
 
@@ -395,50 +366,69 @@ def run_model(pipeline, ds, config, rag_keys=None):
     save=True,
     user_rag = config['include_rag_example']
     system_directions=config['system_directions']
-    prompt_front=config['prompt_front']
-    prompt_middle = config['prompt_middle']
-    prompt_end = config['prompt_end']
+    #prompt_front=config['prompt_front']
+    #prompt_middle = config['prompt_middle']
+    #prompt_end = config['prompt_end']
     include_example_output=config['include_example_output']
     holder = []
-    #if rag_keys is None:
-    #    rag_keys = [None for x in range(num_samples)]
     output_directory = setup_output_directory(trial_name)
     for x in tqdm(range(num_samples)):   
+        prompt_holder = []
         if rag_keys:
             rag_key = rag_keys[x]         
             rag_prompt = GenericPrompt(ds, 
                             rag_key,
-                            prompt_front=rag_prompt_front,
-                            prompt_middle=rag_prompt_middle,
-                            prompt_end=rag_prompt_end,
-                            include_paper=False,
-                            include_example_output=False)
-        GenP = GenericPrompt(ds, 
-                            ds.target_keys[x],
-                            prompt_front=prompt_front,
-                            prompt_middle=prompt_middle,
-                            prompt_end=prompt_end,
-                            include_paper=False,
-                            include_example_output=False)
-        
-        pmodule = PromptModule(GenP.prompt)
-        prompt = construct_prompt(system=system_directions, 
+                            prompt_front=config['rag_prompt_front'],
+                            prompt_middle=config['rag_prompt_middle'],
+                            prompt_end=config['rag_prompt_end'],
+                            include_paper=config['include_paper'],
+                            include_example_output=config['include_rag_example'],
+                            rag=True)
+            prompt_holder.append(rag_prompt.prompt)
+        else: rag_key = None
+        target_key = ds.target_keys[x]
+        target_prompt = GenericPrompt(ds, 
+                            target_key,
+                            prompt_front=config['prompt_front'],
+                            prompt_middle=config['prompt_middle'],
+                            prompt_end=config['prompt_end'],
+                            include_paper=config['include_paper'],
+                            include_example_output=config['include_example_output'])
+        prompt_holder.append(target_prompt.prompt)
+        # pdb.set_trace()
+        pmodule = PromptModule(*prompt_holder)
+        prompt = prompt_builder(system=system_directions, 
                                   user=pmodule.full_prompt)
-        target_key = GenP.target_key
-        pmcid = GenP.paper_name
-        bare_prompt = GenP.bare_prompt
         output = get_output(pipeline, 
                             prompt, 
                             max_new_tokens=max_new_tokens,
                             temp=temp, 
                             top_p=0.9)
-        new_log_output(#output='meow', 
+        log_output(
                 output=output,
                 pmodule=pmodule, 
                 config=config, 
                 output_path=output_directory,
-                target_key=target_key)
-    return df
+                target_key=target_key,
+                rag_key=rag_key,
+                prompt=prompt)
+        
+    get_scoring_df(config=config,
+                   output_path = output_directory)
+
+def get_scoring_df(config, output_path):
+    num_samples = config['num_samples']
+    target_keys = config['target_keys']
+    rag_keys = config['rag_keys']
+    score_column = [None for x in range(num_samples)]
+    df = pd.DataFrame([target_keys[:num_samples], 
+                       rag_keys[:num_samples],
+                       score_column
+                       ]).T
+    df.columns = ["target_key", "rag_key", 'score']
+    csv_name = f'{config["trial_name"]}_scoresheet.csv'
+    df.to_csv(f'{output_path}/{csv_name}')
+    
 
 
 def get_time():

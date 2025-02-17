@@ -14,15 +14,19 @@
     "prompt_middle" : "middle\n\n\n", 
     "prompt_end" : "******",
     "include_paper": false,
-    "include_example_output": false,
+    "include_example_output": true,
 
     "include_rag_example": true,
     "rag_prompt_front" : "FOR THE RAG", 
     "rag_prompt_middle" : "middle raggy\n\n\n", 
     "rag_prompt_end" : "back rag******",
-    "rag_keys": false,
+    "rag_keys": ["NC_009504",
+                "CP017183",
+                "NC_002516",
+                "MINA00000000"               
+],
 
-    "num_samples": 2,
+    "num_samples": 1,
     "max_new_tokens": 250,
     "temperature" : 0.025
 }

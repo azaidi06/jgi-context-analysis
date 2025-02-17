@@ -31,10 +31,9 @@ if __name__ == "__main__":
     if debug_mode: 
         print(f'These are the identifiers we are looking at: {identifiers}')
 
-    out_df = run_model(pipeline=pipeline,
-                       ds=ds, 
-                       config=config)
-    print(out_df.shape)
+    run_model(pipeline=pipeline,
+              ds=ds, 
+              config=config)
 
 ''' 
 Things to declare upfront
