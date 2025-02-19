@@ -364,11 +364,7 @@ def run_model(pipeline, ds, config, rag_keys=None):
     csv_name = config['trial_name']
     trial_name = config['trial_name']
     save=True,
-    user_rag = config['include_rag_example']
     system_directions=config['system_directions']
-    #prompt_front=config['prompt_front']
-    #prompt_middle = config['prompt_middle']
-    #prompt_end = config['prompt_end']
     include_example_output=config['include_example_output']
     holder = []
     output_directory = setup_output_directory(trial_name)
@@ -383,7 +379,7 @@ def run_model(pipeline, ds, config, rag_keys=None):
                             prompt_end=config['rag_prompt_end'],
                             include_paper=config['include_paper'],
                             include_example_output=config['include_rag_example'],
-                            rag=True)
+                            rag=config['include_rag_example'])
             prompt_holder.append(rag_prompt.prompt)
         else: rag_key = None
         target_key = ds.target_keys[x]
@@ -427,7 +423,7 @@ def get_scoring_df(config, output_path):
                        ]).T
     df.columns = ["target_key", "rag_key", 'score']
     csv_name = f'{config["trial_name"]}_scoresheet.csv'
-    df.to_csv(f'{output_path}/{csv_name}')
+    df.to_csv(f'{output_path}/{csv_name}', index=False)
     
 
 
