@@ -24,12 +24,15 @@ if __name__ == "__main__":
     if debug_mode: print('got dataset\n')
     
     model_type = config['model_type']
-    pipeline = get_pipeline(model_type, eigth_bit=False, four_bit=False,)
+    pipeline = get_pipeline(model_type, 
+                            eigth_bit=config['eight_bit_quant'], 
+                            four_bit=config['four_bit_quant'],)
     print(f'got pipeline: we are using {model_type}\n')
 
     identifiers = get_test_target_keys()
     if debug_mode: 
-        print(f'These are the identifiers we are looking at: {identifiers}')
+        print(f'These are the target_keys we are looking at: {config["target_keys"]}')
+        print(f'These are the rag_keys we are using: {config["rag_keys"]}')
 
     run_model(pipeline=pipeline,
               ds=ds, 

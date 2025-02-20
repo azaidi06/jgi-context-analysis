@@ -11,7 +11,14 @@ import json
 import torch
 import json
 import pdb
+import re
 
+def replace_text(full_text, new_string):
+    return re.sub(r'\*\*(.*?)\*\*', new_string, full_text)
+
+original_string = "This is **X** and another **Y**."
+replacement = "NEW_TEXT"
+result = re.sub(r'\*\*(.*?)\*\*', replacement, original_string)
 
 def read_paper(paper_name):
     delimiter = '|~|'
@@ -353,12 +360,21 @@ def setup_output_directory(trial_name,
     make_trial_folder(output_directory)
     return output_directory
 
+#arbitrary function to allow passing a single rag or target key
+# and then having that map to all the items in the other list
+def extend_list(list_one, list_two):
+    if len(list_one) == 1:
+        list_one = [list_one[0] for x in range(len(list_two))]
+    if len(list_two) == 1:
+        list_two = [list_two[0] for x in range(len(list_one))]
+    return list_one, list_two
 
 def run_model(pipeline, ds, config, rag_keys=None):
     model_type = config['model_type']
     num_samples=config['num_samples'] #needs to be at or below #of target keys
     target_keys=config['target_keys'] # want this to be a list that we iterate over
     rag_keys = config['rag_keys']
+    target_keys, rag_keys = extend_list(target_keys, rag_keys)
     max_new_tokens=config['max_new_tokens'] 
     temp = config['temperature']
     csv_name = config['trial_name']
@@ -368,26 +384,32 @@ def run_model(pipeline, ds, config, rag_keys=None):
     include_example_output=config['include_example_output']
     holder = []
     output_directory = setup_output_directory(trial_name)
+    if num_samples == -1:
+        if len(rag_keys) > len(target_keys):
+            num_samples = len(rag_keys)
+        else:
+            num_samples = len(target_keys)
+
     for x in tqdm(range(num_samples)):   
         prompt_holder = []
         if rag_keys:
             rag_key = rag_keys[x]         
             rag_prompt = GenericPrompt(ds, 
                             rag_key,
-                            prompt_front=config['rag_prompt_front'],
-                            prompt_middle=config['rag_prompt_middle'],
-                            prompt_end=config['rag_prompt_end'],
+                            prompt_front=replace_text(config['prompt_front'], rag_key),
+                            prompt_middle=replace_text(config['prompt_middle'], rag_key),
+                            prompt_end=replace_text(config['prompt_end'], rag_key),
                             include_paper=config['include_paper'],
                             include_example_output=config['include_rag_example'],
                             rag=config['include_rag_example'])
             prompt_holder.append(rag_prompt.prompt)
         else: rag_key = None
-        target_key = ds.target_keys[x]
+        target_key = target_keys[x]
         target_prompt = GenericPrompt(ds, 
                             target_key,
-                            prompt_front=config['prompt_front'],
-                            prompt_middle=config['prompt_middle'],
-                            prompt_end=config['prompt_end'],
+                            prompt_front=replace_text(config['prompt_front'], target_key),
+                            prompt_middle=replace_text(config['prompt_middle'], target_key),
+                            prompt_end=replace_text(config['prompt_end'], target_key),
                             include_paper=config['include_paper'],
                             include_example_output=config['include_example_output'])
         prompt_holder.append(target_prompt.prompt)
